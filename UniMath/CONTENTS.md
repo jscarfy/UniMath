@@ -92,7 +92,7 @@ The packages and files are listed here in logical order: each file depends only 
    - [Tests.v](NumberSystems/Tests.v)
    - [All.v](NumberSystems/All.v)
 ## NumberTheory
-   -[Primes.v](NumberTheory/Primes.v)
+   - [Primes.v](NumberTheory/Primes.v)
 ## Package [SyntheticHomotopyTheory](SyntheticHomotopyTheory/README.md)
    - [Halfline.v](SyntheticHomotopyTheory/Halfline.v)
    - [AffineLine.v](SyntheticHomotopyTheory/AffineLine.v)
