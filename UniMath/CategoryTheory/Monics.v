@@ -21,8 +21,8 @@ Local Open Scope cat.
 (** * Definition of Monics *)
 Section def_monic.
 
-  Variable C : precategory.
-  Hypothesis hs : has_homsets C.
+  Variable C : category.
+  Let hs : has_homsets C := homset_property C.
 
   (** Definition and construction of isMonic. *)
   Definition isMonic {y z : C} (f : y --> z) : UU :=
@@ -122,13 +122,13 @@ Arguments isMonic [C] [y] [z] _.
 (** * Construction of the subcategory consisting of all monics. *)
 Section monics_subcategory.
 
-  Variable C : precategory.
-  Hypothesis hs : has_homsets C.
+  Variable C : category.
+  Let hs : has_homsets C := homset_property C.
 
   Definition hsubtype_obs_isMonic : hsubtype C := (λ c : C, make_hProp _ isapropunit).
 
   Definition hsubtype_mors_isMonic : ∏ (a b : C), hsubtype (C⟦a, b⟧) :=
-    (λ a b : C, (fun f : C⟦a, b⟧ => make_hProp _ (isapropisMonic C hs f))).
+    (λ a b : C, (fun f : C⟦a, b⟧ => make_hProp _ (isapropisMonic C f))).
 
   Definition subprecategory_of_monics : sub_precategories C.
   Proof.
@@ -146,31 +146,66 @@ Section monics_subcategory.
   Proof.
     intros a b.
     apply is_set_sub_precategory_morphisms.
-    exact hs.
   Qed.
 
-  Definition subprecategory_of_monics_ob (c : C) : ob (subprecategory_of_monics) := tpair _ c tt.
+  Definition subcategory_of_monics : category := make_category _ has_homsets_subprecategory_of_monics.
+
+  Definition subprecategory_of_monics_ob (c : C) : ob (subcategory_of_monics) := tpair _ c tt.
 
   Definition subprecategory_of_monics_mor {c' c : C} (f : c' --> c) (isM : isMonic f) :
-    subprecategory_of_monics⟦subprecategory_of_monics_ob c', subprecategory_of_monics_ob c⟧ :=
+    subcategory_of_monics⟦subprecategory_of_monics_ob c', subprecategory_of_monics_ob c⟧ :=
     tpair _ f isM.
 
+  (*A morphism (f,,s) in subcategory_of_monics is a z_iso 
+  if the underlying morphism is also a z_iso,
+  because the inverse must be monic.
+  *)
+  Local Lemma is_z_iso_in_subcategory_of_monics_from_is_z_iso (a b : subcategory_of_monics)
+    (f : C⟦ pr1 a , pr1 b ⟧)
+    (p : isMonic f) (H : is_z_isomorphism f)
+    : is_z_isomorphism (precategory_morphisms_in_subcat f p).
+  Proof.
+    use make_is_z_isomorphism.
+    + use precategory_morphisms_in_subcat.
+      - exact (is_z_isomorphism_mor H).
+      - use is_iso_isMonic.
+        use is_z_isomorphism_inv.
+    + induction (is_z_isomorphism_is_inverse_in_precat H) as (H1,H2).
+      split.
+      - use eq_in_sub_precategory.
+        exact H1.
+      - use eq_in_sub_precategory.
+        exact H2.
+  Defined.
+
+  (*The converse of the previous result is always true, see [is_z_iso_from_is_z_iso_in_subcategory]*)
+  Definition is_z_iso_in_subcategory_of_monics_weq (a b : subcategory_of_monics)
+  (f : a --> b)
+  : (is_z_isomorphism (pr1 f)) ≃ (is_z_isomorphism f).
+  Proof.
+    use weqimplimpl.
+    + use is_z_iso_in_subcategory_of_monics_from_is_z_iso.
+    + use is_z_iso_from_is_z_iso_in_subcategory.
+    + use (isaprop_is_z_isomorphism).
+    + use (isaprop_is_z_isomorphism).
+  Defined.
 End monics_subcategory.
 
 
 (** * In functor categories monics can be constructed from pointwise monics *)
 Section monics_functorcategories.
 
-  Lemma is_nat_trans_monic_from_pointwise_monics (C D : precategory) (hs : has_homsets D)
-        (F G : ob (functor_precategory C D hs)) (α : F --> G) (H : ∏ a : ob C, isMonic (pr1 α a)) :
+  Lemma is_nat_trans_monic_from_pointwise_monics (C D : category)
+        (F G : ob (functor_category C D)) (α : F --> G) (H : ∏ a : ob C, isMonic (pr1 α a)) :
     isMonic α.
   Proof.
     intros G' β η H'.
-    use (nat_trans_eq hs).
-    intros x.
-    set (H'' := nat_trans_eq_pointwise H' x). cbn in H''.
-    apply (H x) in H''.
-    exact H''.
+    use (nat_trans_eq).
+    - apply D.
+    - intros x.
+      set (H'' := nat_trans_eq_pointwise H' x). cbn in H''.
+      apply (H x) in H''.
+      exact H''.
   Qed.
 
 End monics_functorcategories.
@@ -178,7 +213,7 @@ End monics_functorcategories.
 
 (** Faithful functors reflect monomorphisms. *)
 
-Lemma faithful_reflects_mono {C D : precategory} (F : functor C D)
+Lemma faithful_reflects_mono {C D : category} (F : functor C D)
       (FF : faithful F) : reflects_morphism F (@isMonic).
 Proof.
   unfold reflects_morphism.

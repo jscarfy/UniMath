@@ -1,6 +1,6 @@
 (** Authors Anthony Bordg and Floris van Doorn, February-December 2017 *)
 
-Require Import UniMath.MoreFoundations.All.
+Require Import UniMath.MoreFoundations.Tactics.
 Require Import UniMath.Algebra.RigsAndRings.
 Require Import UniMath.Algebra.Groups.
 Require Import UniMath.Algebra.Monoids.
@@ -15,8 +15,7 @@ Require Import UniMath.Algebra.Monoids.
   - Isomorphisms ([moduleiso])
 *)
 
-Local Open Scope addmonoid_scope.
-Import UniMath.Algebra.Monoids.AddNotation.
+Local Open Scope addmonoid.
 
 (** ** The ring of endomorphisms of an abelian group *)
 
@@ -143,7 +142,7 @@ Defined.
 Local Open Scope abgr_scope.
 
 Lemma islinv_setofendabgr_inv {G : abgr} :
-  islinv (@ringofendabgr_op1 G) setofendabgr_un0 setofendabgr_inv.
+  islinv (@ringofendabgr_op1 G) (unel_is (@ismonoidop_ringofendabgr_op1 G)) setofendabgr_inv.
 Proof.
    intro f.
    use total2_paths_f.
@@ -153,7 +152,7 @@ Proof.
 Defined.
 
 Lemma isrinv_setofendabgr_inv {G : abgr} :
-  isrinv (@ringofendabgr_op1 G) setofendabgr_un0 setofendabgr_inv.
+  isrinv (@ringofendabgr_op1 G) (unel_is (@ismonoidop_ringofendabgr_op1 G)) setofendabgr_inv.
 Proof.
    intro f.
    use total2_paths_f.
@@ -442,8 +441,7 @@ Definition linearfun_islinear {R} {M N : module R} (f : linearfun M N) :
 Lemma islinearfuncomp {R : ring} {M N P : module R} (f : linearfun M N) (g : linearfun N P) :
   islinear (funcomp f g).
 Proof.
-  intros r x.
-  unfold funcomp.
+  intros r x; simpl.
   rewrite (linearfun_islinear f).
   rewrite (linearfun_islinear g).
   apply idpath.

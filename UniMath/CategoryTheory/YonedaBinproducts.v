@@ -12,10 +12,10 @@ Require Import UniMath.CategoryTheory.Core.Categories.
 Require Import UniMath.CategoryTheory.Core.Functors.
 Require Import UniMath.CategoryTheory.Core.Isos.
 Require Import UniMath.CategoryTheory.Core.NaturalTransformations.
-Require Import UniMath.CategoryTheory.limits.binproducts.
+Require Import UniMath.CategoryTheory.Limits.BinProducts.
 Require Import UniMath.CategoryTheory.Presheaf.
 Require Import UniMath.CategoryTheory.opp_precat.
-Require Import UniMath.CategoryTheory.categories.HSET.Core.
+Require Import UniMath.CategoryTheory.Categories.HSET.Core.
 Require Import UniMath.CategoryTheory.yoneda.
 
 Local Open Scope cat.
@@ -24,7 +24,7 @@ Section iso_yoneda_binproducts.
 
 Context {C : category} (PC : BinProducts C) (X Y : C).
 
-Let yon := yoneda C (homset_property C).
+Let yon : C ⟶ [C^op, HSET] := yoneda C.
 
 (** First we create a natural transformation from Yon(X × Y) to Yon(X) × Yon(Y). *)
 Definition yon_binprod_nat_trans_data :

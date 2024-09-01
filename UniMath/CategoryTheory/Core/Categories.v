@@ -14,6 +14,7 @@
 Require Import UniMath.Foundations.Propositions.
 Require Import UniMath.Foundations.Sets.
 
+Require Import UniMath.MoreFoundations.PartA.
 Require Import UniMath.MoreFoundations.Notations.
 
 (** * Definition of a precategory *)
@@ -36,9 +37,6 @@ Definition precategory_morphisms { C : precategory_ob_mor } :
 
 Declare Scope cat.
 Delimit Scope cat with cat.     (* for precategories *)
-Delimit Scope cat with Cat.     (* a slight enhancement for categories *)
-Declare Scope cat_deprecated.
-Delimit Scope cat_deprecated with cat_deprecated.
 Local Open Scope cat.
 
 Notation "a --> b" := (precategory_morphisms a b) : cat.
@@ -62,7 +60,8 @@ Definition precategory_id_comp (C : precategory_ob_mor) : UU
       ×
     (∏ a b c : C, a --> b -> b --> c -> a --> c). (* composition *)
 
-Definition precategory_data : UU := ∑ X, precategory_id_comp X.
+Definition precategory_data : UU
+  := ∑ C : precategory_ob_mor, precategory_id_comp C.
 
 Definition make_precategory_data (C : precategory_ob_mor)
     (id : ∏ c : C, c --> c)
@@ -79,13 +78,9 @@ Definition identity {C : precategory_data}
   : ∏ c : C, c --> c
   := pr1 (pr2 C).
 
-Local Notation "1" := (identity _) : cat.
-
 Definition compose {C : precategory_data} { a b c : C }
   : a --> b -> b --> c -> a --> c
   := pr2 (pr2 C) a b c.
-
-Notation "f ;; g" := (compose f g) : cat_deprecated.
 
 Notation "f · g" := (compose f g) : cat.
 (* to input: type "\centerdot" or "\cdot" with Agda input method *)
@@ -166,7 +161,13 @@ Definition category := ∑ C:precategory, has_homsets C.
 Definition make_category C h : category := C,,h.
 Definition category_to_precategory : category -> precategory := pr1.
 Coercion category_to_precategory : category >-> precategory.
-Definition homset_property (C : category) : has_homsets C := pr2 C.
+Coercion homset_property (C : category) : has_homsets C := pr2 C.
+
+Definition homset
+           {C : category}
+           (x y : C)
+  : hSet
+  := x --> y ,, homset_property C x y.
 
 Definition makecategory
     (obj : UU)
@@ -200,6 +201,15 @@ Proof.
   { intros. repeat (apply impred; intro). apply hs. }
 Qed.
 
+Lemma category_eq (C D : category) :
+  (C:precategory_data) = (D:precategory_data) -> C=D.
+Proof.
+  intro e. apply subtypePath. intro. apply isaprop_has_homsets.
+  apply subtypePath'.
+  { assumption. }
+  apply isaprop_is_precategory.
+  apply homset_property.
+Defined.
 
 Definition id_left (C : precategory) :
    ∏ (a b : C) (f : a --> b),
@@ -264,18 +274,21 @@ Qed.
 Lemma cancel_postcomposition {C : precategory_data} {a b c: C}
    (f f' : a --> b) (g : b --> c) : f = f' -> f · g = f' · g.
 Proof.
-  intro H.
-  induction H.
-  apply idpath.
+  intro; apply maponpaths_2; assumption.
 Defined.
 
 Lemma cancel_precomposition (C : precategory_data) (a b c: C)
    (f f' : b --> c) (g : a --> b) : f = f' -> g · f = g · f'.
 Proof.
-  intro H.
-  induction H.
-  apply idpath.
+  apply maponpaths.
 Defined.
+
+Lemma maponpaths_compose
+      {C : category} {x y z : C} (f1 f2 : C⟦x,y⟧) (g1 g2 : C⟦y,z⟧)
+  : f1 = f2 -> g1 = g2 -> f1 · g1 = f2 · g2.
+Proof.
+  exact (λ p q, maponpaths_12 compose p q).
+Qed.
 
 (** Any equality on objects a and b induces a morphism from a to b *)
 
@@ -293,29 +306,3 @@ Proof.
   exact (identity a).
 Defined.
 
-Section SectionsAndRetractions.
-  Context {C : precategory}.
-
-  Definition is_retraction {A B : ob C} (m : A --> B) (r : B --> A) :=
-    m · r = identity A.
-
-  Lemma isaprop_is_retraction {A B : ob C} (m : A --> B) (r : B --> A) :
-    has_homsets C -> isaprop (is_retraction m r).
-  Proof.
-    intro H; apply H.
-  Qed.
-
-  (** A retraction of B onto A *)
-  Definition retraction (A B : ob C) :=
-    ∑ m r, @is_retraction A B m r.
-
-  Lemma isaset_retraction (A B : ob C) :
-    has_homsets C -> isaset (retraction A B).
-  Proof.
-    intro.
-    do 2 (apply isaset_total2; [auto|intros]).
-    apply hlevelntosn, isaprop_is_retraction.
-    assumption.
-  Qed.
-
-End SectionsAndRetractions.

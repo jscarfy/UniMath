@@ -6,11 +6,11 @@ various authors, as recorded in the README (or README.md) file in it.
 
 ## Contributing code to UniMath
 
-Volunteers may look at unassigned issues at github and volunteer to be assigned
-one of them.  New proposals and ideas may be submitted as issues at github for
+Volunteers may look at unassigned issues at GitHub and volunteer to be assigned
+one of them.  New proposals and ideas may be submitted as issues at GitHub for
 discussion and feedback.
 
-Contributions are submitted in the form of pull requests at github and are
+Contributions are submitted in the form of pull requests at GitHub and are
 subject to approval by the UniMath Development Team.
 
 Changes to the package "Foundations" are normally not accepted, for we are
@@ -84,8 +84,28 @@ semantics is more likely to be rigorously verifiable and portable to new proof
 checking systems, and we follow a style of coding designed to render proofs
 less fragile and to make the files have a more uniform and pleasing appearance.
 
-* Constructing identifiers:
-    * form the identifier by concatenating English words or existing identifiers, separating them by underscores
+* Identifiers and function names
+  * Form identifiers by concatenating English words or existing identifiers in
+    lower case, separating them by underscores.
+  * Unless it impedes clarity or goes against common practice avoid using
+    abbreviations.
+  * In some parts of the library uppercase is used for bundled mathematical
+    objects (e.g. `Pullback`, `Topos`).  It is sometimes justified to introduce
+    new identifiers using this naming scheme.  The following guidelines should
+    then be applied:
+    * Identifiers with capital letters must not use underscores to separate
+      words, they must use `CamelCase`.
+    * Only use `CamelCase` when it is already used in the parts of the library
+      you are working in or there is some compelling reason for it to be
+      introduced.
+    * Do not use `CamelCase` for intermediary structures.  Example: if
+      `CamelCase`contains a data part and a property part then name these
+      `camel_case_data` and `is_camel_case`, do not call them `CamelCaseData`
+      and `IsCamelCase`.
+    * Upper-case letters should not be used in function names unless there is
+      specific good reason to do so.  In general name your functions
+      `make_camel_case` and `camel_case_property`, not `make_CamelCase` and
+      `CamelCase_property`, even if the object is called `CamelCase`.
 * Do not use `Admitted` or introduce new axioms.
 * Do not use `apply` with a term that needs no additional arguments filled in,
   because using `exact` would be clearer.
@@ -106,7 +126,8 @@ less fragile and to make the files have a more uniform and pleasing appearance.
   because different names might be used by Coq when the definition of the type
   is changed.  Name all variables introduced by `assert`, if they are used by
   name later, with `as` or to the left of a colon.
-* Do not end a proof with `Qed.`, except with `Goal`, for that may prevent later computations.
+* Avoid ending proofs with `Qed`, because that may prevent future computation. If you decide to make a proof opaque,
+  then make sure that its type is a proposition. It is undesirable to write multiple opaque proofs of properties, for then proofs of equality of objects containing them cannot be accomplished by reflexivity.
 * Start all proofs with `Proof.` on a separate line and end it with
   `Defined.` on a separate line, as this makes it possible for us to generate
   HTML with expansible/collapsible proofs.
@@ -118,7 +139,8 @@ less fragile and to make the files have a more uniform and pleasing appearance.
   should be local or in a scope.  All scopes, if opened, should be opened only locally.
   Consider also putting them into a submodule, for then they won't be activated even
   for printing.
-* Each line should be limited to at most 100 (unicode) characters.  The
+* When introducing a notation using Unicode characters, document in a comment how to input that character using the Agda input method.
+* Each line should be limited to at most 100 (Unicode) characters.  The
   makefile target `enforce-max-line-length` can be used to detect nonconforming
   files, and the target `show-long-lines` can be used to display the
   nonconforming lines.

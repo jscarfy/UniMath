@@ -10,13 +10,13 @@ Written by: Anders Mörtberg, 2018
 Require Import UniMath.MoreFoundations.All.
 
 Require Import UniMath.CategoryTheory.Core.Categories.
-Require Import UniMath.CategoryTheory.limits.terminal.
+Require Import UniMath.CategoryTheory.Limits.Terminal.
 
 Local Open Scope cat.
 
 Section nno.
 
-Context {C : precategory} (TC : Terminal C).
+Context {C : category} (TC : Terminal C).
 
 Local Notation "1" := TC.
 

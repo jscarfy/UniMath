@@ -1,19 +1,15 @@
-(** * Additionals theorems *)
+(** * Additional theorems *)
 
 Require Export UniMath.Foundations.Sets.
 Require Import UniMath.MoreFoundations.Tactics.
+Require Import UniMath.MoreFoundations.Subtypes.
 Require Export UniMath.Combinatorics.FiniteSequences.
 Require Export UniMath.Foundations.NaturalNumbers.
 
+Require Export UniMath.Tactics.EnsureStructuredProofs.
+
 (** ** hProp *)
 
-Lemma hinhuniv' {P X : UU} :
-  isaprop P → (X → P) → (∥ X ∥ → P).
-Proof.
-  intros HP Hx.
-  apply (hinhuniv (P := make_hProp _ HP)).
-  exact Hx.
-Qed.
 Lemma hinhuniv2' {P X Y : UU} :
   isaprop P → (X → Y → P) → (∥ X ∥ → ∥ Y ∥ → P).
 Proof.
@@ -74,8 +70,8 @@ Proof.
   intros m.
   induction m as [m _].
   induction m as [ | _ _].
-  exact A.
-  exact B.
+  - exact A.
+  - exact B.
 Defined.
 
 (** ** More about sets *)
@@ -119,14 +115,14 @@ Proof.
   - apply hinhfun ; apply sumofmaps ; [ intros Ax | intros Bx].
     + exists A.
       split.
-      apply hinhpr.
-      now left.
-      exact Ax.
+      * apply hinhpr.
+        now left.
+      * exact Ax.
     + exists B.
       split.
-      apply hinhpr.
-      now right.
-      exact Bx.
+      * apply hinhpr.
+        now right.
+      * exact Bx.
 Qed.
 
 Lemma union_hProp {X : UU} :
@@ -142,14 +138,40 @@ Proof.
   now apply sumofmaps ; intros ->.
 Qed.
 
+Local Open Scope logic.
+Local Open Scope subtype.
+
+Lemma union_not_contained_in {X : UU} (U : (X -> hProp) -> hProp) (S : X -> hProp) :
+  union U ⊈ S ⇔ (∃ T, U T ∧ T ⊈ S).
+Proof.
+  unfold subtype_notContainedIn, union.
+  use make_dirprod; intro H.
+  - use (hinhuniv _ H); intro Hx.
+    induction Hx as [x Hx]. induction Hx as [Hx HSx].
+    use (hinhfun _ Hx); intro HT.
+    induction HT as [T HT].
+    exists T. use make_dirprod.
+    + exact (dirprod_pr1 HT).
+    + apply hinhpr. exists x.
+      exact (make_dirprod (dirprod_pr2 HT) HSx).
+  - use (hinhuniv _ H); intro HT.
+    induction HT as [T HT].
+    use (hinhfun _ (dirprod_pr2 HT)); intro Hx.
+    induction Hx as [x Hx].
+    exists x. use make_dirprod.
+    + apply hinhpr. exists T.
+      exact (make_dirprod (dirprod_pr1 HT) (dirprod_pr1 Hx)).
+    + exact (dirprod_pr2 Hx).
+Defined.
+
 (** finite intersection *)
 
 Definition finite_intersection {X : UU} (P : Sequence (X → hProp)) : X → hProp.
 Proof.
   intros x.
   simple refine (make_hProp _ _).
-  apply (∏ n, P n x).
-  apply (impred_isaprop _ (λ _, propproperty _)).
+  - apply (∏ n, P n x).
+  - apply (impred_isaprop _ (λ _, propproperty _)).
 Defined.
 
 Lemma finite_intersection_htrue {X : UU} :
@@ -191,10 +213,10 @@ Proof.
   apply hPropUnivalence.
   - intros H.
     split.
-    simple refine (H (0,,_)).
-    reflexivity.
-    simple refine (H (1,,_)).
-    reflexivity.
+    + simple refine (H (0,,_)).
+      reflexivity.
+    + simple refine (H (1,,_)).
+      reflexivity.
   - intros H m ; simpl.
     change m with (pr1 m,,pr2 m).
     generalize (pr1 m) (pr2 m).
@@ -234,16 +256,17 @@ Proof.
         clear m ;
         intros m Hm.
       induction (natlehchoice _ _ (natlthsntoleh _ _ Hm)) as [Hm' | ->].
-      generalize (pr2 Hx (m,,Hm')).
-      unfold funcomp, dni_lastelement ; simpl.
-      assert (H : Hm = natlthtolths m n Hm' ).
-      { apply (pr2 (natlth m (S n))). }
-      now rewrite H.
-      assert (H : lastelement = (n,, Hm)).
-      { now apply subtypePath_prop. }
-      rewrite <- H.
-      exact (pr1 Hx).
+      * generalize (pr2 Hx (m,,Hm')).
+        unfold dni_lastelement ; simpl.
+        assert (H : Hm = natlthtolths m n Hm' ).
+        { apply (pr2 (natlth m (S n))). }
+        now rewrite H.
+      * assert (H : lastelement = (n,, Hm)).
+        { now apply subtypePath_prop. }
+        rewrite <- H.
+        exact (pr1 Hx).
 Qed.
+
 Lemma finite_intersection_append {X : UU} :
   ∏ (A : X → hProp) (L : Sequence (X → hProp)),
     finite_intersection (append L A) = (λ x : X, A x ∧ finite_intersection L x).
@@ -258,7 +281,7 @@ Proof.
   - induction L as [n L] ; simpl.
     apply maponpaths.
     apply funextfun ; intro m.
-    unfold funcomp.
+    simpl.
     rewrite <- replace_dni_last.
     apply append_vec_compute_1.
   - reflexivity.

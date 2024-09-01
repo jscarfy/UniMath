@@ -10,11 +10,11 @@ Require Import UniMath.CategoryTheory.Core.Isos.
 Require Import UniMath.CategoryTheory.Core.TransportMorphisms.
 Require Import UniMath.CategoryTheory.Groupoids.
 Require Import UniMath.CategoryTheory.DisplayedCats.Core.
-Require Import UniMath.CategoryTheory.categories.StandardCategories.
+Require Import UniMath.CategoryTheory.Categories.StandardCategories.
 Require Import UniMath.Bicategories.Core.Bicat. Import Bicat.Notations.
 Require Import UniMath.Bicategories.Core.Examples.OneTypes.
 Require Import UniMath.Bicategories.Core.Examples.Groupoids.
-Require Import UniMath.Bicategories.Core.Examples.BicatOfCats.
+Require Import UniMath.Bicategories.Core.Examples.BicatOfUnivCats.
 Require Import UniMath.Bicategories.PseudoFunctors.PseudoFunctor.
 Require Import UniMath.Bicategories.PseudoFunctors.Biequivalence.
 Require Import UniMath.Bicategories.PseudoFunctors.Examples.PathGroupoid.
@@ -45,12 +45,12 @@ Proof.
         exact (λ G, pr11 G).
       * cbn. intros G1 G2 x y F.
         (** 1-cells over F are properties: F preserves points *)
-        exact (iso (pr1 F x) y).
+        exact (z_iso (pr1 F x) y).
     + (** Identity and composition of 1-cells: composition of properties *)
       use tpair.
-      * exact (λ G x, identity_iso x).
+      * exact (λ G x, identity_z_iso x).
       * intros G1 G2 G3 F1 F2 x y z i1 i2.
-        exact (iso_comp (functor_on_iso (pr1 F2) i1) i2).
+        exact (z_iso_comp (functor_on_z_iso (pr1 F2) i1) i2).
   - intros G1 G2 F1 F2 α x y i1 i2. cbn in *.
     (** Two cells over α : F1 ==> F2 *)
     unfold total_prebicat_cell_struct in α.
@@ -110,28 +110,7 @@ Qed.
 Definition pgrpds_prebicat_laws
   : disp_prebicat_laws (pgrpds_disp_prebicat_1_id_comp_cells,, pgrpds_disp_prebicat_ops).
 Proof.
-  cbn. repeat split; intro; intros.
-  - apply (pr1 b).
-  - apply (pr1 b).
-  - apply (pr1 b).
-  - apply (pr1 c).
-  - apply (pr1 c).
-  - apply (pr1 c).
-  - apply (pr1 c).
-  - apply (pr1 b).
-  - apply (pr1 b).
-  - apply (pr1 d).
-  - apply (pr1 d).
-  - apply (pr1 d).
-  - apply (pr1 c).
-  - apply (pr1 b).
-  - apply (pr1 b).
-  - apply (pr1 b).
-  - apply (pr1 b).
-  - apply (pr1 d).
-  - apply (pr1 d).
-  - apply (pr1 c).
-  - apply (pr1 e).
+  cbn. repeat split; intro; intros ; apply homset_property.
 Qed.
 
 Definition pgrpds_prebicat : disp_prebicat grpds.
@@ -147,7 +126,7 @@ Proof.
   use tpair.
   - apply pgrpds_prebicat.
   - repeat intro. apply hlevelntosn.
-    apply (pr1 b).
+    apply homset_property.
 Defined.
 
 Definition pgrpds : bicat := total_bicat pgrpds_disp.
@@ -159,7 +138,7 @@ The bicategory of pointed groupoids is biequivalent to the bicategory of pointed
 Definition pgrpds_disp_2cells_isaprop : disp_2cells_isaprop pgrpds_disp.
 Proof.
   intros G₁ G₂; intros.
-  apply (pr1 G₂).
+  apply homset_property.
 Qed.
 
 Definition pgrpds_disp_locally_groupoid : disp_locally_groupoid pgrpds_disp.
@@ -190,7 +169,7 @@ Proof.
   - intros G₁ G₂ F₁ F₂ n pG₁ pG₂ pF₁ pF₂ pn.
     cbn in *.
     refine (!_).
-    apply hornRotation.
+    apply hornRotation_rr.
     refine (!_).
     refine (maponpaths (λ z, _ @ ! z) pn @ _).
     etrans.
@@ -223,7 +202,7 @@ Proof.
        cbn in * ;
        rewrite <- isotoid_comp ;
        apply maponpaths ;
-       apply eq_iso ;
+       apply z_iso_eq ;
        cbn ;
        refine (! p)).
   - abstract
@@ -268,7 +247,7 @@ Proof.
   use make_disp_pstrans.
   - exact pgrpds_disp_2cells_isaprop.
   - exact pgrpds_disp_locally_groupoid.
-  - exact (λ G x, identity_iso x).
+  - exact (λ G x, identity_z_iso x).
   - abstract
       (intros G1 G2 F x y i ;
        cbn in * ;
@@ -295,7 +274,7 @@ Proof.
        cbn;
        refine (_ @ isotoid_idtoiso _ (is_univalent_path_groupoid (pr1 Y) (pr2 Y)) _ _ _);
        apply maponpaths;
-       apply eq_iso;
+       apply z_iso_eq;
        cbn;
        induction p;
        apply idpath).
@@ -310,13 +289,13 @@ Proof.
   - exact pgrpds_disp_2cells_isaprop.
   - exact pgrpds_disp_locally_groupoid.
   - intros G x.
-    exact (@identity_iso (pr11 (path_groupoid (objects_of_grpd G))) x).
+    exact (@identity_z_iso (pr11 (path_groupoid (objects_of_grpd G))) x).
   - abstract
       (intros G1 G2 F x y i;
        cbn;
        rewrite pathscomp0rid;
        apply maponpaths;
-       use eq_iso;
+       use z_iso_eq;
        apply idpath).
 Defined.
 
@@ -337,7 +316,7 @@ Proof.
        refine (!(isotoid_idtoiso _ (is_univalent_path_groupoid (pr1 Y) (pr2 Y)) _ _ _) @_);
        apply maponpaths;
        induction p;
-       use eq_iso;
+       use z_iso_eq;
        apply idpath).
 Defined.
 
@@ -393,7 +372,7 @@ Proof.
       (intros G x;
        cbn;
        rewrite !id_right;
-       apply (iso_inv_after_iso (id₁ x ,, _))).
+       apply (z_iso_inv_after_z_iso (id₁ x ,, _))).
 Defined.
 
 Definition disp_path_pgroupoid_counit_counit_inv :
@@ -411,7 +390,7 @@ Proof.
        rewrite pathscomp0rid;
        refine (! (isotoid_idtoiso _ (pr21 G) _ _ (idpath _)) @ _);
        apply maponpaths;
-       apply eq_iso;
+       apply z_iso_eq;
        apply idpath).
 Defined.
 

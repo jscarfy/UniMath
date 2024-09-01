@@ -1,10 +1,10 @@
 (** Authors Floris van Doorn, December 2017 *)
 
-Require Import UniMath.MoreFoundations.All.
+Require Import UniMath.MoreFoundations.Subtypes.
+Require Import UniMath.MoreFoundations.Sets.
 Require Import UniMath.Algebra.Monoids.
 Require Import UniMath.Algebra.Groups.
 Require Import UniMath.Algebra.IteratedBinaryOperations.
-Require Import UniMath.MoreFoundations.Subtypes.
 Require Import UniMath.Combinatorics.Lists.
 
 (** ** Contents
@@ -18,7 +18,7 @@ Require Import UniMath.Combinatorics.Lists.
 - Abelian group presented by a set of generators and relations
 *)
 
-Local Open Scope multmonoid_scope.
+Local Open Scope multmonoid.
 Local Notation "[]" := nil (at level 0, format "[]").
 Local Infix "::" := cons.
 
@@ -94,11 +94,22 @@ Lemma free_monoid_extend_funcomp {X Y : hSet} {Z : monoid} (f : X → Y) (g : Y 
 Proof.
   unfold homot. simpl. apply list_ind.
     + reflexivity.
-    + intros x xs IH. unfold funcomp in *. now rewrite !map_cons, !iterop_list_mon_step, IH.
+    + intros x xs IH. now rewrite !map_cons, !iterop_list_mon_step, IH.
 Defined.
 
+Lemma free_monoid_extend_funcomp2
+  {X Y : hSet}
+  {Z : monoid}
+  (f: (X → free_monoid Y))
+  (g: (Y → Z))
+  : monoidfuncomp (free_monoid_extend f) (free_monoid_extend g) = free_monoid_extend (λ x, free_monoid_extend g (f x)).
+Proof.
+  apply (invmaponpathsweq (invweq (free_monoid_universal_property _ _)) _ _).
+  now apply idpath.
+Qed.
+
 (** Functoriality of the [free_monoidfun] *)
-Lemma free_monoidfun_comp_homot {X Y Z : hSet} (f : X -> Y) (g : Y -> Z) :
+Lemma free_monoidfun_comp_homot {X Y Z : hSet} (f : X → Y) (g : Y → Z) :
   (free_monoidfun (g ∘ f)) ~ free_monoidfun g ∘ free_monoidfun f.
 Proof.
   intro; apply map_compose.
@@ -270,6 +281,18 @@ Proof.
     unfold funcomp. rewrite free_abmonoidfun_setquotpr.
     refine (!setquotunivcomm _ _ _ _ _).
 Defined.
+
+Proposition free_abmonoid_mor_eq
+            {X : hSet}
+            {Y : abmonoid}
+            {f g : monoidfun (free_abmonoid X) Y}
+            (p : ∏ (x : X), f (free_abmonoid_unit x) = g (free_abmonoid_unit x))
+  : f = g.
+Proof.
+  use (invmaponpathsweq (invweq (free_abmonoid_universal_property X Y)) f g).
+  use funextsec.
+  exact p.
+Qed.
 
 (* Abelian monoid presented by a set of generators and relations *)
 

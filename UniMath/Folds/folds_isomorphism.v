@@ -32,7 +32,6 @@ Require Import UniMath.Foundations.UnivalenceAxiom.
 Require Import UniMath.CategoryTheory.Core.Categories.
 Require Import UniMath.CategoryTheory.Core.Isos.
 
-Require Import UniMath.Folds.aux_lemmas.
 Require Import UniMath.Folds.folds_precat.
 Require Import UniMath.Folds.from_precats_to_folds_and_back.
 
@@ -51,8 +50,8 @@ Local Notation "'id' a" := (identity (C:=C') a) (at level 30).
 
 
 Definition folds_iso_data (a b : C) : UU :=
-  ((∏ {x : C}, (x ⇒ a) ≃ (x ⇒ b))
- × (∏ {z : C}, (a ⇒ z) ≃ (b ⇒ z)))
+  ((∏ (x : C), (x ⇒ a) ≃ (x ⇒ b))
+ × (∏ (z : C), (a ⇒ z) ≃ (b ⇒ z)))
 ×             ((a ⇒ a) ≃ (b ⇒ b)).
 
 Definition ϕ₁ {a b : C} (f : folds_iso_data a b) {x : C} : (x ⇒ a) ≃ (x ⇒ b) :=
@@ -202,7 +201,7 @@ Proof.
     - rewrite H. apply ϕ₁_ϕ₂_id.
     - rewrite H. apply ϕ₂_ϕ₁_id. }
   assert (X : ϕ₂ i (id _ ) = ϕ₂ i' (id _ )).
-  { set (H1:= inverse_unique_precat C' _ _  _ _  _ (ϕ₁_ϕ₂_are_inverse i) H').
+  { set (H1:= inverse_unique_precat _ _  _ _  _ (ϕ₁_ϕ₂_are_inverse i) H').
     assumption.
   }
   rewrite X.
@@ -239,7 +238,7 @@ Proof.
       * intro; apply isapropisweq.
       * apply funextfun. unfold homot. apply ϕ₂_determined.
   - apply subtypePath.
-    intro. apply isapropisweq.
+    { intro. apply isapropisweq. }
     apply funextfun. intro t.
     apply ϕo_determined.
 Qed.
@@ -401,21 +400,24 @@ Proof.
       set (H2 := comp_compose2' H).
       rewrite assoc in H2.
       eapply post_comp_with_z_iso_is_inj.
-      apply (z_iso_is_inverse_in_precat f). apply H2.
+      * apply (z_iso_is_inverse_in_precat f).
+      * apply H2.
   - simpl. apply logeqweq.
     + intro H. apply comp_compose2.
       apply pathsinv0. eapply pathscomp0.
       * apply (pathsinv0 (comp_compose2' H)).
       * transitivity ((f0 □ (f □ (inv_from_z_iso f))) □ g).
-        rewrite z_iso_inv_after_z_iso. rewrite id_right. apply idpath.
-        repeat rewrite assoc; apply idpath.
+        ** rewrite z_iso_inv_after_z_iso.
+           rewrite id_right.
+           apply idpath.
+        ** repeat rewrite assoc; apply idpath.
     + intro H. apply comp_compose2.
       set (H2 := comp_compose2' H). apply pathsinv0.
       eapply pathscomp0.
       * apply (pathsinv0 H2).
       * transitivity ((f0 □ (f □ (inv_from_z_iso f))) □ g).
-        repeat rewrite assoc; apply idpath.
-        rewrite z_iso_inv_after_z_iso. rewrite id_right. apply idpath.
+        ** repeat rewrite assoc; apply idpath.
+        ** rewrite z_iso_inv_after_z_iso. rewrite id_right. apply idpath.
   - simpl. apply logeqweq.
     + intro H. apply comp_compose2.
       rewrite <- assoc. rewrite (comp_compose2' H). apply idpath.
@@ -484,14 +486,14 @@ Proof.
   - simpl. apply logeqweq.
     + intro H. apply id_identity2.
       rewrite (id_identity2' H). rewrite (@id_left C').
-      apply (z_iso_after_z_iso_inv _ _ _ f).
+      apply (z_iso_after_z_iso_inv f).
     + intro H. apply id_identity2.
       set (H':=id_identity2' H); clearbody H'; clear H.
-      set (H2:=z_iso_inv_to_left _ _ _ _ f _ _ H'); clearbody H2.
+      set (H2:=z_iso_inv_to_left _ _ _ f _ _ H'); clearbody H2.
       rewrite id_right in H2.
       transitivity (f □ (inv_from_z_iso f)).
-      * apply (z_iso_inv_on_left C'), pathsinv0, H2.
-      * apply (z_iso_inv_after_z_iso C').
+      * apply (z_iso_inv_on_left (C:=C')), pathsinv0, H2.
+      * apply (z_iso_inv_after_z_iso (C := C')).
 Qed.
 
 Definition folds_iso_from_iso : folds_iso a b := tpair _ _ folds_iso_data_prop.
@@ -526,7 +528,7 @@ Context {a b : C} (i : z_iso (C:=C') a b).
 
 Lemma iso_from_folds_iso_folds_iso_from_iso : iso_from_folds_iso _ _ (folds_iso_from_iso _ _ i) = i.
 Proof.
-  apply eq_z_iso. apply hs.
+  apply (z_iso_eq(C:=C',,hs)).
   apply (@id_left C').
 Qed.
 

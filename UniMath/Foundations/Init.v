@@ -1,9 +1,5 @@
 (** Initial setup unrelated to Univalent Foundations *)
 
-Require Export Coq.Init.Logic.
-(* this fixes the advanced forms of the 'rewrite' tactic, but we want to eliminate it eventually *)
-(* Unfortunately, it also defines some notations, which we need to override later, hence the necessity to suppress such warnings. *)
-
 Require Export Coq.Init.Notations.
 (* get the standard Coq reserved notations *)
 
@@ -35,7 +31,7 @@ Reserved Notation "x :: y" (at level 60, right associativity). (* originally in 
 
 Reserved Notation "x ++ y" (at level 60, right associativity). (* originally in Coq.Init.Datatypes *)
 
-Reserved Notation "p # x" (right associativity, at level 65, only parsing).
+Reserved Notation "p # x" (right associativity, at level 65).
 
 Reserved Notation "a ╝ b" (at level 70, no associativity).
 (* in agda input mode use \--= and select the 6-th one in the first set,
@@ -44,7 +40,7 @@ Reserved Notation "a ╝ b" (at level 70, no associativity).
 Reserved Notation "X ≃ Y" (at level 80, no associativity).
 (* written \~- or \simeq in Agda input method *)
 
-Reserved Notation "p #' x" (right associativity, at level 65, only parsing).
+Reserved Notation "p #' x" (right associativity, at level 65).
 
 Reserved Notation "f ~ g" (at level 70, no associativity).
 
@@ -66,7 +62,7 @@ Reserved Notation "C ⟦ a , b ⟧" (at level 49, right associativity).
 
 Reserved Notation "⟦ a ⟧" (at level 48, left associativity).
 
-Reserved Notation "f ;; g"  (at level 50, left associativity, only parsing). (* deprecated *)
+Reserved Notation "f ;; g"  (at level 50, left associativity, format "f  ;;  g"). (* deprecated *)
 
 Reserved Notation "g ∘ f"  (at level 40, left associativity).
 (* to input: type "\circ" with Agda input method *)
@@ -83,7 +79,7 @@ Reserved Notation "! p " (at level 50, left associativity).
     Reserved Notation "p # x" (right associativity, at level 65, only parsing).
 *)
 
-Reserved Notation "p #' x" (right associativity, at level 65, only parsing).
+Reserved Notation "p #' x" (right associativity, at level 65).
 
 Reserved Notation "C '^op'" (at level 3, format "C ^op").
 
@@ -114,6 +110,9 @@ Reserved Notation "F ∙ G" (at level 35).
 
 Reserved Notation "X ⊗ Y"  (at level 40, left associativity).
 (* to input: type "\ox" or "\otimes" with Agda input method *)
+
+Reserved Notation "f '⊗₁' g" (at level 40, left associativity).
+Reserved Notation "α '⊗₂' β" (at level 40, left associativity).
 
 Reserved Notation "F ◾ b"  (at level 36, left associativity).
 (* to input: type "\sqb" or "\sq" with Agda input method *)
@@ -193,5 +192,6 @@ Ltac exact_op x := (* from Jason Gross: same as "exact", but with unification th
   exact (((λ g:G, g) : T -> G) x).
 
 Create HintDb rewrite discriminated.
+#[global]
 Hint Variables Opaque : rewrite.
 Create HintDb typeclass_instances discriminated.

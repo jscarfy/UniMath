@@ -7,6 +7,8 @@
 
 (** Imports *)
 
+Require Export UniMath.Tactics.EnsureStructuredProofs.
+
 Require Import UniMath.Foundations.PartA.
 Require Import UniMath.Foundations.Propositions.
 Require Import UniMath.Foundations.NaturalNumbers.
@@ -19,33 +21,12 @@ Unset Kernel Term Sharing. (** for quicker proof-checking, approx. by factor 25 
 
 (** Fixing some notation *)
 
-(** * Notation, terminology and very basic facts *)
+(** * Notation, terminology  *)
 
 Arguments tpair [ T P ].
 
-Lemma pathintotalfiber ( B : UU ) ( E : B -> UU ) ( b0 b1 : B )
-      ( e0 : E b0 ) ( e1 : E b1 ) ( p0 : b0 = b1 ) ( p1 : transportf E p0 e0 = e1 ) :
-  ( tpair b0 e0 ) = ( tpair b1 e1 ).
-Proof.
-  intros. destruct p0, p1. apply idpath.
-Defined.
-
 Definition neq ( X : UU ) : hrel X :=
   fun x y : X => make_hProp (neg (x = y)) (isapropneg (x = y)).
-
-Definition pathintotalpr1 { B : UU } { E : B -> UU } { v w : total2 E} ( p : v = w ) :
-  ( pr1 v ) = ( pr1 w ) := maponpaths ( fun x => pr1 x ) p.
-
-Lemma isinclisinj { A B : UU } { f : A -> B } ( p : isincl f ) { a b : A }
-      ( f_eq : f a = f b ) : a = b.
-Proof.
-  intros.
-  set ( q := p ( f a )).
-  set ( a' := make_hfiber f a ( idpath ( f a ) ) ).
-  set ( b' := make_hfiber f b ( pathsinv0 f_eq ) ).
-  assert ( a' = b' ) as p1. apply (p ( f a ) ).
-  apply ( pathintotalpr1 p1 ).
-Defined.
 
 (** * I. Lemmas on natural numbers *)
 
@@ -90,9 +71,9 @@ Proof.
   - auto.
   - intros m p q r. destruct m.
     + apply fromempty. exact (isirreflnatlth 0%nat q ).
-    + assert ( natleh n m ) as a. apply r.
+    + assert ( natleh n m ) as a. { apply r. }
       assert ( natleh ( sub n 0%nat ) m ) as a0.
-        exact (transportf ( fun x : nat => natleh x m ) ( pathsinv0 ( minus0r n ) ) a).
+      { exact (transportf ( fun x : nat => natleh x m ) ( pathsinv0 ( minus0r n ) ) a). }
       exact ( transportf ( fun x : nat => natleh ( sub n 0 ) x ) (pathsinv0 ( minus0r m ) ) a0 ).
 Defined.
 
@@ -231,11 +212,15 @@ Proof.
     + change ( sub ( S n ) (sub n m ) = S m ).
       rewrite <- pathssminus.
       * rewrite IHn.
-        ++  apply idpath.
-        ++ assumption.
+        --  apply idpath.
+        -- assumption.
       * apply ( minuslth ( S n ) ( S m ) ).
-        ++ apply (natlehlthtrans _ n ). apply natleh0n. apply natlthnsn.
-        ++ apply (natlehlthtrans _ m ). apply natleh0n. apply natlthnsn.
+        -- apply (natlehlthtrans _ n ).
+           ++ apply natleh0n.
+           ++ apply natlthnsn.
+        -- apply (natlehlthtrans _ m ).
+           ++ apply natleh0n.
+           ++ apply natlthnsn.
 Defined.
 
 Lemma boolnegtrueimplfalse ( v : bool ) ( p : neg ( v = true ) ) : v = false.
@@ -258,8 +243,9 @@ Proof.
   intros.
   unfold natcoface.
   destruct ( natgtb i n ).
-  - apply natlthtoleh.  apply (natlehlthtrans _ upper ).
-    assumption. apply natlthnsn.
+  - apply natlthtoleh. apply (natlehlthtrans _ upper ).
+    + assumption.
+    + apply natlthnsn.
   - apply p.
 Defined.
 
@@ -283,7 +269,7 @@ Lemma natcofaceretractisretract ( i : nat ) :
   funcomp ( natcoface i ) ( natcofaceretract i ) = idfun nat.
 Proof.
   simpl. apply funextfun.
-  intro n. unfold funcomp.
+  intro n. simpl.
   set ( c := natlthorgeh n i ). destruct c as [ h | k ].
   - unfold natcoface. rewrite h. unfold natcofaceretract. rewrite h.  apply idpath.
   - assert ( natgtb i n = false ) as f.
@@ -292,8 +278,9 @@ Proof.
     assert ( natgtb i ( S n ) = false ) as ff.
     { apply natgehimplnatgtbfalse.
       apply ( istransnatgeh _ n ).
-      apply natgthtogeh. apply natgthsnn. assumption. }
-    rewrite ff.  rewrite minussn1.  apply idpath.
+      + apply natgthtogeh. apply natgthsnn.
+      + assumption. }
+    rewrite ff. rewrite minussn1. apply idpath.
 Defined.
 
 Lemma isinjnatcoface ( i x y : nat ) : natcoface i x = natcoface i y -> x = y.
@@ -303,7 +290,7 @@ Proof.
   rewrite <- ( natcofaceretractisretract i ).
   change y with ( idfun _ y ).
   rewrite <- ( natcofaceretractisretract i ).
-  unfold funcomp. rewrite p. apply idpath.
+  simpl. rewrite p. apply idpath.
 Defined.
 
 Lemma natlehdecomp ( b a : nat ) :
@@ -414,7 +401,7 @@ Proof.
       change ( ( @ringunel2 X ) * c = c )%ring.
       apply ringlunax2.
     }
-    apply pathintotalfiber with ( p0 := f0 ).
+    apply (total2_paths2_f f0 ).
     assert ( isaprop ( c * a = ( @ringunel2 X )  ×
                        a * c = ( @ringunel2 X ) ) ) as is.
     { apply isofhleveldirprod.
@@ -634,7 +621,7 @@ Definition hzldistr ( a b c : hz ) : c * ( a + b ) = ( c * a ) + ( c * b ) :=
 
 Lemma hzabsvaland1 : hzabsval 1 = 1%nat.
 Proof.
-  apply ( isinclisinj isinclnattohz ).
+  apply ( invmaponpathsincl _ isinclnattohz ).
   rewrite hzabsvalgth0.
   - rewrite nattohzand1.
     apply idpath.
@@ -654,7 +641,7 @@ Proof.
       apply p.
     - assumption.
   }
-  apply ( isinclisinj isinclnattohz ).
+  apply ( invmaponpathsincl _ isinclnattohz ).
   rewrite nattohzandplus.
   rewrite hzabsvalgeh0. (* used to start with rewrite 3! hzabsvalgeh0 *)
   - rewrite hzabsvalgeh0.
@@ -678,7 +665,7 @@ Proof.
     - apply hzlth0andminus.
       assumption.
   }
-  apply ( isinclisinj isinclnattohz ).
+  apply ( invmaponpathsincl _ isinclnattohz ).
   rewrite nattohzandplus.
   rewrite hzabsvallth0.
   - rewrite hzabsvallth0.
@@ -715,11 +702,11 @@ Proof.
     apply ( isirreflhzlth m ).
     apply ( hzlehlthtrans _ n _ ).
     + rewrite <- ( hzabsvalgeh0 ).
-      rewrite <- ( hzabsvalgeh0 p ).
-      apply nattohzandleh.
-      apply k.
-      apply hzgthtogeh.
-      apply ( hzgthgehtrans _ n _ ); assumption.
+      * rewrite <- ( hzabsvalgeh0 p ).
+        apply nattohzandleh.
+        apply k.
+      * apply hzgthtogeh.
+        apply ( hzgthgehtrans _ n _ ); assumption.
     + assumption.
 Defined.
 
@@ -958,18 +945,6 @@ Proof.
         -- apply q.
            ++ rewrite right. split.
            ++ intros k s. rewrite right in s. apply ( IHn k ). assumption.
-Defined.
-
-Lemma setquotprpathsandR { X : UU } ( R : eqrel X ) :
-  forall x y : X, setquotpr R x = setquotpr R y -> R x y.
-Proof.
-  intros.
-  assert ( pr1 ( setquotpr R x ) y ) as i.
-  { assert ( pr1 ( setquotpr R y ) y ) as i0.
-    { unfold setquotpr. simpl. apply (pr2 (pr1 (pr2 R))). }
-    destruct X0. assumption.
-  }
-  apply i.
 Defined.
 
 (* Some lemmas on decidable properties of natural numbers. *)

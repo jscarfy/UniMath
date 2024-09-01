@@ -3,8 +3,9 @@
 (** * Metric trees *)
 
 Require Import UniMath.Foundations.All.
-Require Import UniMath.MoreFoundations.All.
+Require Import UniMath.MoreFoundations.Nat.
 Import UniMath.MoreFoundations.Nat.Discern.
+Require Import UniMath.MoreFoundations.Notations.
 
 (** ** Definitions *)
 
@@ -16,7 +17,7 @@ Definition Tree : Type :=
     (mt_symm:    ∏ x y, mt_dist x y = mt_dist y x)
     (mt_trans:   ∏ x y z, mt_dist x z <= mt_dist x y + mt_dist y z),
   (* mt_step: *) ∏ x z, x != z -> ∑ y, (S (mt_dist x y) = mt_dist x z) × (mt_dist y z = 1).
-Coercion mt_set (x:Tree) := pr1 x.
+#[reversible=no] Coercion mt_set (x:Tree) := pr1 x.
 Definition mt_dist (x:Tree) := pr12 x.
 Definition mt_refl (x:Tree) := pr122 x.
 Definition mt_anti (x:Tree) := pr122 (pr2 x).
@@ -51,7 +52,7 @@ Definition tree_induction (T:Tree) (x:T) (P:T->Type)
   ∏ z, P z.
 Proof.
   assert(d_ind : ∏ n z, mt_dist _ x z = n -> P z).
-  { intros ?.
+  { intro.
     induction n as [|n IH].
     { intros. assert (k:x=z).
       { apply mt_anti. assumption. } destruct k. assumption. }

@@ -31,7 +31,7 @@ Ltac rewrite_cbn_inv x := let H := fresh in (set (H := x); cbn in H; rewrite <- 
 
 Section Algebras.
 
-Context {C : precategory} (T : Monad C).
+Context {C : category} (T : Monad C).
 
 
 (** Definition of an algebra of a monad T *)
@@ -40,7 +40,7 @@ Section Algebra_def.
 
 Definition Algebra_data : UU := ∑ X : C, T X --> X.
 
-Coercion Alg_carrier (X : Algebra_data) : C := pr1 X.
+#[reversible=no] Coercion Alg_carrier (X : Algebra_data) : C := pr1 X.
 
 Definition Alg_map (X : Algebra_data) : T X --> X := pr2 X.
 
@@ -50,7 +50,7 @@ Definition Algebra_laws (X : Algebra_data) : UU
 
 Definition Algebra : UU := ∑ X : Algebra_data, Algebra_laws X.
 
-Coercion Algebra_data_from_Algebra (X : Algebra) : Algebra_data := pr1 X.
+#[reversible=no] Coercion Algebra_data_from_Algebra (X : Algebra) : Algebra_data := pr1 X.
 
 Definition Algebra_idlaw (X : Algebra) : η T X · Alg_map X = identity X
   := pr1 (pr2 X).
@@ -82,7 +82,7 @@ Definition is_Algebra_mor {X Y : Algebra} (f : X --> Y) : UU
 Definition Algebra_mor (X Y : Algebra) : UU
   := ∑ f : X --> Y, is_Algebra_mor f.
 
-Coercion mor_from_Algebra_mor {X Y : Algebra} (f : Algebra_mor X Y)
+#[reversible=no] Coercion mor_from_Algebra_mor {X Y : Algebra} (f : Algebra_mor X Y)
   : X --> Y := pr1 f.
 
 Definition Algebra_mor_commutes {X Y : Algebra} (f : Algebra_mor X Y)
@@ -145,9 +145,9 @@ Proof.
   - apply assoc'.
 Qed.
 
-Definition MonadAlg : precategory := ( _,, is_precategory_precategory_Alg_data).
+Definition MonadAlg_precat : precategory := ( _,, is_precategory_precategory_Alg_data).
 
-Lemma has_homsets_MonadAlg : has_homsets MonadAlg.
+Lemma has_homsets_MonadAlg : has_homsets MonadAlg_precat.
 Proof.
   intros X Y.
   apply (isofhleveltotal2 2).
@@ -156,6 +156,8 @@ Proof.
     apply isasetaprop.
     apply homset_property.
 Qed.
+
+Definition MonadAlg: category := MonadAlg_precat ,, has_homsets_MonadAlg.
 
 End Algebra_category.
 
@@ -233,8 +235,7 @@ Defined.
 Definition Alg_adjunction_monad_eq : Monad_from_adjunction free_forgetful_are_adjoints = T.
 Proof.
   apply Monad_eq_raw_data.
-  - apply homset_property.
-  - apply idpath.
+  apply idpath.
 Defined.
 
 End Algebra_adjunction.
@@ -378,7 +379,8 @@ Defined.
 
 Definition lift_monad : Monad (MonadAlg S).
 Proof.
-  exists ((lift_functor ,, lift_μ) ,, lift_η).
+  exists lift_functor.
+  exists (lift_μ ,, lift_η).
   abstract (split;
             [ split; intro X;
               apply subtypePath;

@@ -20,19 +20,21 @@ Require Import UniMath.Foundations.Propositions.
 Require Import UniMath.Foundations.Sets.
 Require Import UniMath.MoreFoundations.Tactics.
 
-Require Import UniMath.Algebra.Lattice.
+Require Import UniMath.Algebra.Monoids.
+Require Import UniMath.OrderTheory.Lattice.Lattice.
+Require Import UniMath.OrderTheory.Lattice.Bounded.
 
 Require Import UniMath.CategoryTheory.Core.Categories.
 Require Import UniMath.CategoryTheory.Monics.
-Require Import UniMath.CategoryTheory.limits.binproducts.
-Require Import UniMath.CategoryTheory.limits.terminal.
+Require Import UniMath.CategoryTheory.Limits.BinProducts.
+Require Import UniMath.CategoryTheory.Limits.Terminal.
 
 Local Open Scope cat.
 
 (** * Definition of lattice objects and bounded lattice objects *)
 Section LatticeObject_def.
 
-Context {C : precategory} {BPC : BinProducts C}.
+Context {C : category} {BPC : BinProducts C}.
 
 Local Notation "c ⊗ d" := (BinProductObject C (BPC c d)) : cat.
 Local Notation "f '××' g" := (BinProductOfArrows _ _ _ f g) (at level 80) : cat.
@@ -166,7 +168,7 @@ Arguments bounded_latticeob {_} _ _ _.
 
 Section LatticeObject_accessors.
 
-Context {C : precategory} (BPC : BinProducts C) {L : C} (isL : latticeob BPC L).
+Context {C : category} (BPC : BinProducts C) {L : C} (isL : latticeob BPC L).
 
 Definition isassoc_meet_mor : isassoc_cat (meet_mor isL) :=
   pr1 (pr1 (pr2 (pr2 isL))).
@@ -185,7 +187,7 @@ End LatticeObject_accessors.
 
 Section BoundedLatticeObject_accessors.
 
-Context {C : precategory} (BPC : BinProducts C) (TC : Terminal C).
+Context {C : category} (BPC : BinProducts C) (TC : Terminal C).
 Context {L : C} (l : bounded_latticeob BPC TC L).
 
 Definition islunit_join_mor_bot_mor : islunit_cat (join_mor l) (bot_mor l) :=
@@ -200,7 +202,7 @@ End BoundedLatticeObject_accessors.
 (** * Definition of sublattice objects  *)
 Section SublatticeObject.
 
-Context {C : precategory} (BPC : BinProducts C) {M L : C}.
+Context {C : category} (BPC : BinProducts C) {M L : C}.
 Context {i : C⟦M,L⟧} (Hi : isMonic i) (l : latticeob BPC L).
 
 Local Notation "c ⊗ d" := (BinProductObject C (BPC c d)) : cat.
@@ -307,7 +309,7 @@ End SublatticeObject.
 
 Section SubboundedlatticeObject.
 
-Context {C : precategory} (BPC : BinProducts C) (TC : Terminal C).
+Context {C : category} (BPC : BinProducts C) (TC : Terminal C).
 Context {M L : C} {i : C⟦M,L⟧} (Hi : isMonic i) (l : bounded_latticeob BPC TC L).
 
 Local Notation "c ⊗ d" := (BinProductObject C (BPC c d)) : cat.

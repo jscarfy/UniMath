@@ -41,7 +41,7 @@ Require Import UniMath.CategoryTheory.Core.Categories.
 Require Import UniMath.CategoryTheory.Core.Functors.
 Require Import UniMath.CategoryTheory.Core.Isos.
 Require Import UniMath.CategoryTheory.Core.NaturalTransformations.
-Require Import UniMath.CategoryTheory.limits.binproducts.
+Require Import UniMath.CategoryTheory.Limits.BinProducts.
 Require Import UniMath.CategoryTheory.exponentials.
 Require Import UniMath.CategoryTheory.whiskering.
 Require Import UniMath.CategoryTheory.opp_precat.
@@ -50,11 +50,11 @@ Require Import UniMath.CategoryTheory.RightKanExtension.
 Require Import UniMath.CategoryTheory.Adjunctions.Core.
 Require Import UniMath.CategoryTheory.yoneda.
 Require Import UniMath.CategoryTheory.YonedaBinproducts.
-Require Import UniMath.CategoryTheory.categories.HSET.Core.
-Require Import UniMath.CategoryTheory.categories.HSET.Limits.
-Require Import UniMath.CategoryTheory.categories.HSET.Structures.
-Require Import UniMath.CategoryTheory.categories.HSET.MonoEpiIso.
-Require Import UniMath.CategoryTheory.limits.graphs.limits.
+Require Import UniMath.CategoryTheory.Categories.HSET.Core.
+Require Import UniMath.CategoryTheory.Categories.HSET.Limits.
+Require Import UniMath.CategoryTheory.Categories.HSET.Structures.
+Require Import UniMath.CategoryTheory.Categories.HSET.MonoEpiIso.
+Require Import UniMath.CategoryTheory.Limits.Graphs.Limits.
 Require Import UniMath.CategoryTheory.Presheaf.
 
 Local Open Scope cat.
@@ -65,14 +65,13 @@ Context {C : category} (PC : BinProducts C) (c : C).
 
 Let prod_functor_c : functor C C := constprod_functor1 PC c.
 
-Let Yon {C : category} : C ⟶ PreShv C := yoneda C (homset_property C).
+Let Yon {C : category} : C ⟶ PreShv C := yoneda C.
 
 Definition precomp_prod_functor : functor (PreShv C) (PreShv C).
 Proof.
   use pre_composition_functor.
-  - apply has_homsets_opp, homset_property.
-  - apply functor_opp.
-    exact prod_functor_c.
+  apply functor_opp.
+  exact prod_functor_c.
 Defined.
 
 Lemma precomp_prod_functor_has_right_adjoint : is_left_adjoint precomp_prod_functor.
@@ -84,8 +83,6 @@ Defined.
 Definition PreShv_exponentials : Exponentials (@BinProducts_PreShv C).
 Proof.
   apply Exponentials_functor_HSET.
-  apply has_homsets_opp.
-  apply homset_property.
 Defined.
 
 Definition exp (F : PreShv C) : functor (PreShv C) (PreShv C) :=
@@ -102,7 +99,7 @@ Proof.
     + exact (PreShv C)^op.
     + use functor_opp.
       exact Yon.
-    + exact (yoneda _ (homset_property _) ((exp (Yon c)) F)).
+    + exact (yoneda _ ((exp (Yon c)) F)).
   - intros F G α.
     use make_nat_trans.
     + intros X f.
@@ -130,9 +127,9 @@ Definition Fun1 : functor (PreShv C) (PreShv C) :=
   make_functor _ is_functor_Fun1.
 
 Lemma first_iso_on_sets (F : PreShv C) (x : C) :
-  iso (pr1 (Fun1 F) x) (pr1 ((exp (Yon c)) F) x).
+  z_iso (pr1 (Fun1 F) x) (pr1 ((exp (Yon c)) F) x).
 Proof.
-  use hset_equiv_iso.
+  use hset_equiv_z_iso.
   use yoneda_weq.
 Defined.
 
@@ -153,10 +150,10 @@ Proof.
   now apply funextsec.
 Qed.
 
-Lemma first_iso_on_functors : @iso [PreShv C, PreShv C] (exp (Yon c)) Fun1.
+Lemma first_iso_on_functors : @z_iso [PreShv C, PreShv C] (exp (Yon c)) Fun1.
 Proof.
-  use iso_inv_from_iso.
-  use make_PreShv_functor_iso.
+  use z_iso_inv_from_z_iso.
+  use make_PreShv_functor_z_iso.
   - intros F x.
     use first_iso_on_sets.
   - intro F.
@@ -199,9 +196,9 @@ Qed.
 Definition Fun2 : functor (PreShv C) (PreShv C) := make_functor _ is_functor_Fun2.
 
 Lemma second_iso_on_sets (F : PreShv C) (x : C) :
-  iso (pr1 (Fun1 F) x) (pr1 (Fun2 F) x).
+  z_iso (pr1 (Fun1 F) x) (pr1 (Fun2 F) x).
 Proof.
-  use hset_equiv_iso.
+  use hset_equiv_z_iso.
   use invweq.
   use (adjunction_hom_weq (pr2 (PreShv_exponentials (Yon c)))).
 Defined.
@@ -211,8 +208,8 @@ Lemma second_iso_nat_in_x (F : PreShv C) :
 Proof.
   intros X Y f.
   apply funextsec; intro g.
-  apply (nat_trans_eq has_homsets_HSET); intros ?.
-  apply funextsec; intros ?.
+  apply (nat_trans_eq has_homsets_HSET); intro.
+  apply funextsec; intro.
   apply maponpaths; apply idpath.
 Qed.
 
@@ -222,18 +219,18 @@ Lemma second_iso_nat_in_F :
                                     (second_iso_on_sets F) (second_iso_nat_in_x F)).
 Proof.
   intros X Y f.
-  apply (nat_trans_eq has_homsets_HSET); intros ?.
+  apply (nat_trans_eq has_homsets_HSET); intro.
   apply funextsec; intros g.
-  apply (nat_trans_eq has_homsets_HSET); intros ?.
+  apply (nat_trans_eq has_homsets_HSET); intro.
   apply funextsec; intros h.
   apply (maponpaths (pr1 f x0)).
   apply (maponpaths (pr1 (pr1 g x0 (pr2 h)) x0)).
   now apply pathsdirprod; [use id_left|].
 Qed.
 
-Lemma second_iso_on_functors : @iso [PreShv C, PreShv C] Fun1 Fun2.
+Lemma second_iso_on_functors : @z_iso [PreShv C, PreShv C] Fun1 Fun2.
 Proof.
-  use make_PreShv_functor_iso.
+  use make_PreShv_functor_z_iso.
   - intros F x.
     use second_iso_on_sets.
   - intro F.
@@ -275,9 +272,9 @@ Qed.
 
 Definition Fun3 : functor (PreShv C) (PreShv C) := make_functor _ is_functor_Fun3.
 
-Lemma third_iso_on_sets (F : PreShv C) (x : C) : iso (pr1 (Fun2 F) x) (pr1 (Fun3 F) x).
+Lemma third_iso_on_sets (F : PreShv C) (x : C) : z_iso (pr1 (Fun2 F) x) (pr1 (Fun3 F) x).
 Proof.
-  use hset_equiv_iso.
+  use hset_equiv_z_iso.
   use iso_comp_right_weq.
   use iso_yoneda_binproducts.
 Defined.
@@ -301,16 +298,16 @@ Lemma third_iso_nat_in_F :
                                     (third_iso_on_sets F) (third_iso_nat_in_x F)).
 Proof.
   intros X Y f.
-  apply (nat_trans_eq has_homsets_HSET); intros ?.
+  apply (nat_trans_eq has_homsets_HSET); intro.
   apply funextsec; intros g.
-  apply (nat_trans_eq has_homsets_HSET); intros ?.
+  apply (nat_trans_eq has_homsets_HSET); intro.
   apply funextsec; intros h.
   apply maponpaths; apply idpath.
 Qed.
 
-Lemma third_iso_on_functors : @iso [PreShv C, PreShv C] Fun2 Fun3.
+Lemma third_iso_on_functors : @z_iso [PreShv C, PreShv C] Fun2 Fun3.
 Proof.
-  use make_PreShv_functor_iso.
+  use make_PreShv_functor_z_iso.
   - intros F x.
     use third_iso_on_sets.
   - intro F.
@@ -321,9 +318,9 @@ Defined.
 
 (** The fourth isomorphism. Follows from the yoneda lemma. *)
 Lemma fourth_iso_on_sets (F : PreShv C) (x : C) :
-  iso (pr1 (Fun3 F) x) (pr1 (precomp_prod_functor F) x).
+  z_iso (pr1 (Fun3 F) x) (pr1 (precomp_prod_functor F) x).
 Proof.
-  use hset_equiv_iso.
+  use hset_equiv_z_iso.
   use yoneda_weq.
 Defined.
 
@@ -331,7 +328,7 @@ Lemma fourth_iso_nat_in_x (F : PreShv C) :
   is_nat_trans (pr1 (Fun3 F)) _ (λ x, fourth_iso_on_sets F x).
 Proof.
   intros X Y f.
-  use (is_natural_yoneda_iso _ _ _ _ _ (BinProduct_of_functors_mor _ _ PC _ _ _ _ _)).
+  use (is_natural_yoneda_iso _ _ _ _  (BinProduct_of_functors_mor _ _ PC _ _ _ _ _)).
 Qed.
 
 Lemma fourth_iso_nat_in_F:
@@ -339,14 +336,14 @@ Lemma fourth_iso_nat_in_F:
     (λ F, make_nat_trans (pr1 (Fun3 F)) _ (fourth_iso_on_sets F) (fourth_iso_nat_in_x F)).
 Proof.
   intros X Y f.
-  apply (nat_trans_eq has_homsets_HSET); intros ?.
+  apply (nat_trans_eq has_homsets_HSET); intro.
   apply funextsec; intros g.
   apply idpath.
 Qed.
 
-Lemma fourth_iso_on_functors : @iso [(PreShv C), (PreShv C)] Fun3 precomp_prod_functor.
+Lemma fourth_iso_on_functors : @z_iso [(PreShv C), (PreShv C)] Fun3 precomp_prod_functor.
 Proof.
-  use make_PreShv_functor_iso.
+  use make_PreShv_functor_z_iso.
   - intros F x.
     use fourth_iso_on_sets.
   - intro F.
@@ -355,20 +352,19 @@ Proof.
 Defined.
 
 (** The exponential functor and the precomposition functor are isomorphic. *)
-Lemma iso_exp_precomp_prod_functor : @iso [PreShv C, PreShv C] precomp_prod_functor (exp (Yon c)).
+Lemma iso_exp_precomp_prod_functor : @z_iso [PreShv C, PreShv C] precomp_prod_functor (exp (Yon c)).
 Proof.
-  use iso_inv_from_iso.
-  use (iso_comp first_iso_on_functors).
-  use (iso_comp second_iso_on_functors).
-  use (iso_comp third_iso_on_functors).
+  use z_iso_inv_from_z_iso.
+  use (z_iso_comp first_iso_on_functors).
+  use (z_iso_comp second_iso_on_functors).
+  use (z_iso_comp third_iso_on_functors).
   use fourth_iso_on_functors.
 Defined.
 
 (** The exponential functor has a right adjoint. *)
 Theorem is_left_adjoint_exp_yoneda : is_left_adjoint (exp (Yon c)).
 Proof.
-  use is_left_adjoint_iso.
-  - apply homset_property.
+  use is_left_adjoint_closed_under_iso.
   - exact precomp_prod_functor.
   - use iso_exp_precomp_prod_functor.
   - use precomp_prod_functor_has_right_adjoint.

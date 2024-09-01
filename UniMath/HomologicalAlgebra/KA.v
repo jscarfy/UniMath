@@ -18,16 +18,16 @@ Require Import UniMath.NumberSystems.Integers.
 
 Require Import UniMath.CategoryTheory.Core.Categories.
 Require Import UniMath.CategoryTheory.Core.TransportMorphisms.
-Require Import UniMath.CategoryTheory.limits.zero.
-Require Import UniMath.CategoryTheory.limits.binproducts.
-Require Import UniMath.CategoryTheory.limits.bincoproducts.
-Require Import UniMath.CategoryTheory.limits.equalizers.
-Require Import UniMath.CategoryTheory.limits.coequalizers.
-Require Import UniMath.CategoryTheory.limits.kernels.
-Require Import UniMath.CategoryTheory.limits.cokernels.
-Require Import UniMath.CategoryTheory.limits.pushouts.
-Require Import UniMath.CategoryTheory.limits.pullbacks.
-Require Import UniMath.CategoryTheory.limits.BinDirectSums.
+Require Import UniMath.CategoryTheory.Limits.Zero.
+Require Import UniMath.CategoryTheory.Limits.BinProducts.
+Require Import UniMath.CategoryTheory.Limits.BinCoproducts.
+Require Import UniMath.CategoryTheory.Limits.Equalizers.
+Require Import UniMath.CategoryTheory.Limits.Coequalizers.
+Require Import UniMath.CategoryTheory.Limits.Kernels.
+Require Import UniMath.CategoryTheory.Limits.Cokernels.
+Require Import UniMath.CategoryTheory.Limits.Pushouts.
+Require Import UniMath.CategoryTheory.Limits.Pullbacks.
+Require Import UniMath.CategoryTheory.Limits.BinDirectSums.
 Require Import UniMath.CategoryTheory.Monics.
 Require Import UniMath.CategoryTheory.Epis.
 Require Import UniMath.CategoryTheory.Core.Functors.
@@ -101,7 +101,7 @@ Section complexes_homotopies.
                              (H i · Diff C2 (i - 1)) ·
                              Diff C2 i) = ZeroArrow (Additive.to_Zero A) _ _).
     {
-      induction (hzrminusplus i 1). cbn. unfold idfun. rewrite <- assoc.
+      induction (hzrminusplus i 1). cbn. rewrite <- assoc.
       rewrite (@DSq A C2 (i - 1)). apply ZeroArrow_comp_right.
     }
     rewrite e0. clear e0.
@@ -156,9 +156,14 @@ Section complexes_homotopies.
     use tpair.
     - use tpair.
       + intros f g. induction f as [f1 f2]. induction g as [g1 g2].
-        use (squash_to_prop f2). apply propproperty. intros f3.
-        use (squash_to_prop g2). apply propproperty. intros g3.
-        induction f3 as [f3 f4]. induction g3 as [g3 g4].
+        use (squash_to_prop f2).
+        { apply propproperty. }
+        intros f3.
+        use (squash_to_prop g2).
+        { apply propproperty. }
+        intros g3.
+        induction f3 as [f3 f4].
+        induction g3 as [g3 g4].
         use hinhpr. cbn.
         use tpair.
         * intros i.
@@ -217,7 +222,9 @@ Section complexes_homotopies.
           rewrite transport_target_ZeroArrow.
           rewrite ZeroArrow_comp_right. rewrite transport_target_ZeroArrow.
           rewrite <- PreAdditive_unel_zero. rewrite to_lunax'. apply idpath.
-    - intros f H. use (squash_to_prop H). apply propproperty. intros H'. clear H.
+    - intros f H. use (squash_to_prop H).
+      { apply propproperty. }
+      intros H'. clear H.
       induction H' as [homot eq]. use hinhpr.
       use tpair.
       + intros i. exact (grinv (to_abgr (C1 i) (C2 (i - 1))) (homot i)).
@@ -242,7 +249,7 @@ Section complexes_homotopies.
                                         (maponpaths C2 (hzrminusplus i 1))
                                         (homot i · Diff C2 (i - 1)))).
         {
-          unfold to_inv. cbn. induction (hzrminusplus i 1). cbn. unfold idfun.
+          unfold to_inv. cbn. induction (hzrminusplus i 1). cbn.
           set (tmp := @PreAdditive_invlcomp A (C1 i) (C2 (i - 1)) (C2 (i - 1 + 1))
                                             (homot i) (Diff C2 (i - 1))).
           apply pathsinv0. unfold to_inv in tmp.
@@ -269,7 +276,9 @@ Section complexes_homotopies.
     ∏ (g : ((ComplexPreCat_Additive A)⟦C1, C2⟧)), ComplexHomotSubset C1 C3 (g · f).
   Proof.
     intros g.
-    use (squash_to_prop H). apply propproperty. intros HH.
+    use (squash_to_prop H).
+    { apply propproperty. }
+    intros HH.
     use hinhpr.
     induction HH as [homot eq].
     use tpair.
@@ -287,7 +296,9 @@ Section complexes_homotopies.
     ∏ (g : ((ComplexPreCat_Additive A)⟦C2, C3⟧)), ComplexHomotSubset C1 C3 (f · g).
   Proof.
     intros g.
-    use (squash_to_prop H). apply propproperty. intros HH.
+    use (squash_to_prop H).
+    { apply propproperty. }
+    intros HH.
     use hinhpr.
     induction HH as [homot eq].
     use tpair.

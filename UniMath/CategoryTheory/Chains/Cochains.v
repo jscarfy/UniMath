@@ -2,15 +2,15 @@
 
 Cochains are diagrams of the form X₀ ← X₁ ← ⋯.
 
-Author: Langston Barrett (@siddharthist), Febuary 2018
+Author: Langston Barrett (@siddharthist), February 2018
  *)
 Require Import UniMath.Foundations.PartA.
 Require Import UniMath.CategoryTheory.Core.Categories.
 Require Import UniMath.Foundations.NaturalNumbers.
 Require Import UniMath.CategoryTheory.Core.Functors.
-Require Import UniMath.CategoryTheory.limits.graphs.colimits.
-Require Import UniMath.CategoryTheory.limits.graphs.limits.
-Require Import UniMath.CategoryTheory.limits.terminal.
+Require Import UniMath.CategoryTheory.Limits.Graphs.Colimits.
+Require Import UniMath.CategoryTheory.Limits.Graphs.Limits.
+Require Import UniMath.CategoryTheory.Limits.Terminal.
 
 Local Open Scope cat.
 
@@ -38,7 +38,7 @@ Proof.
     refine (_ · ars b).
     exact (transportf (λ o, C ⟦ obs o, obs (S b) ⟧) aeqSb (identity _)).
   - exact (λ ars n, ars (S n) n (idpath _)).
-  - intros ars; cbn; unfold idfun.
+  - intros ars; cbn.
     apply funextsec; intro n.
     apply id_left.
   - intros ars.
@@ -47,7 +47,7 @@ Proof.
     apply funextsec; intro b.
     apply funextsec; intro p.
     induction p.
-    cbn; unfold idfun.
+    cbn.
     apply id_left.
 Defined.
 
@@ -55,7 +55,7 @@ Definition mapcochain {C D : precategory} (F : functor C D)
            (c : cochain C) : cochain D := mapdiagram F c.
 
 (** Any j > i gives a morphism in the cochain via composition *)
-Definition cochain_mor {C : precategory} (c : cochain C) {i j} :
+Definition cochain_mor {C : category} (c : cochain C) {i j} :
   i < j -> C⟦dob c j, dob c i⟧.
 Proof.
 induction j as [|j IHj].
@@ -82,3 +82,16 @@ Proof.
     * exact (TerminalArrow TermC _).
     * exact (# F IHn).
 Defined.
+
+(** ** Definition of (ω-)continuous functors *)
+
+Definition is_cont {C D : category} (F : functor C D) : UU :=
+  ∏ (g : graph) (d : diagram g C) (L : C) (cc : cone d L),
+    preserves_limit F d L cc.
+
+Definition is_omega_cont {C D : category} (F : functor C D) : UU :=
+  ∏ (c : cochain C) (L : C) (cc : cone c L),
+    preserves_limit F c L cc.
+
+Definition omega_cont_functor (C D : category) : UU :=
+  ∑ (F : functor C D), is_omega_cont F.

@@ -22,8 +22,8 @@ Require Import UniMath.Foundations.Sets.
 Require Import UniMath.CategoryTheory.Core.Categories.
 Require Import UniMath.CategoryTheory.Core.Functors.
 Require Import UniMath.CategoryTheory.FunctorAlgebras.
-Require Import UniMath.CategoryTheory.categories.HSET.Core.
-Require Import UniMath.CategoryTheory.categories.HSET.Structures.
+Require Import UniMath.CategoryTheory.Categories.HSET.Core.
+Require Import UniMath.CategoryTheory.Categories.HSET.Structures.
 
 Local Open Scope cat.
 Local Open Scope functions.
@@ -135,7 +135,7 @@ Proof.
   eapply pathscomp0.
   - apply (Product_com_con (C := Product_as_set) Pair).
   - apply funextfun; intro p.
-    unfold funcomp.
+    simpl.
     apply maponpaths.
     apply Product_weak_η.
 Defined.
@@ -335,7 +335,7 @@ Proof.
   eapply pathscomp0.
   apply Sum_com_con.
   apply funextfun; intro s.
-  unfold funcomp.
+  simpl.
   apply maponpaths.
   apply Sum_weak_eta.
 Defined.

@@ -13,15 +13,14 @@ Require Import UniMath.CategoryTheory.Core.Functors.
 Local Open Scope cat.
 Require Import UniMath.CategoryTheory.FunctorCategory.
 Require Import UniMath.CategoryTheory.whiskering.
-Require Import UniMath.CategoryTheory.limits.binproducts.
-Require Import UniMath.CategoryTheory.limits.bincoproducts.
-Require Import UniMath.CategoryTheory.limits.terminal.
-Require Import UniMath.CategoryTheory.limits.initial.
+Require Import UniMath.CategoryTheory.Limits.BinProducts.
+Require Import UniMath.CategoryTheory.Limits.BinCoproducts.
+Require Import UniMath.CategoryTheory.Limits.Terminal.
+Require Import UniMath.CategoryTheory.Limits.Initial.
 Require Import UniMath.CategoryTheory.FunctorAlgebras.
 Require Import UniMath.CategoryTheory.PointedFunctors.
 Require Import UniMath.CategoryTheory.PrecategoryBinProduct.
 Require Import UniMath.SubstitutionSystems.Signatures.
-Require Import UniMath.CategoryTheory.UnitorsAndAssociatorsForEndofunctors.
 Require Import UniMath.CategoryTheory.Monads.Monads.
 Require Import UniMath.SubstitutionSystems.BinSumOfSignatures.
 Require Import UniMath.SubstitutionSystems.SubstitutionSystems.
@@ -31,40 +30,36 @@ Require Import UniMath.SubstitutionSystems.MonadsFromSubstitutionSystems.
 Require Import UniMath.SubstitutionSystems.Notation.
 Local Open Scope subsys.
 
-Require Import UniMath.CategoryTheory.limits.graphs.colimits.
+Require Import UniMath.CategoryTheory.Limits.Graphs.Colimits.
 Require Import UniMath.CategoryTheory.exponentials.
-Require Import UniMath.CategoryTheory.categories.HSET.Core.
-Require Import UniMath.CategoryTheory.categories.HSET.Limits.
-Require Import UniMath.CategoryTheory.categories.HSET.Colimits.
-Require Import UniMath.CategoryTheory.categories.HSET.Structures.
+Require Import UniMath.CategoryTheory.Categories.HSET.Core.
+Require Import UniMath.CategoryTheory.Categories.HSET.Limits.
+Require Import UniMath.CategoryTheory.Categories.HSET.Colimits.
+Require Import UniMath.CategoryTheory.Categories.HSET.Structures.
 Require Import UniMath.CategoryTheory.Chains.All.
 
 Section LamHSET.
 
-Let Lam_S : Signature HSET has_homsets_HSET _ _ _ _ :=
-  Lam_Sig HSET has_homsets_HSET TerminalHSET BinCoproductsHSET BinProductsHSET.
+Let Lam_S : Signature HSET _ _ :=
+  Lam_Sig HSET TerminalHSET BinCoproductsHSET BinProductsHSET.
 
-Local Notation "'EndHSET'":= ([HSET, HSET, has_homsets_HSET]) .
-
-Let hsEndC : has_homsets EndHSET := functor_category_has_homsets _ _ has_homsets_HSET.
+Local Notation "'EndHSET'":= ([HSET, HSET]) .
 
 Local Lemma is_omega_cocont_Lam_S : is_omega_cocont Lam_S.
 Proof.
 apply is_omega_cocont_Lam.
 * apply is_omega_cocont_constprod_functor1.
-  apply functor_category_has_homsets.
-  apply (Exponentials_functor_HSET _ has_homsets_HSET).
+  apply Exponentials_functor_HSET.
 * apply ColimsHSET_of_shape.
 Defined.
 
-Lemma Lam_Initial_HSET : Initial (precategory_FunctorAlg (Id_H _ _ BinCoproductsHSET Lam_S) hsEndC).
+Lemma Lam_Initial_HSET : Initial (category_FunctorAlg (Id_H _ BinCoproductsHSET Lam_S)).
 Proof.
 use colimAlgInitial.
 - apply (Initial_functor_precat _ _ InitialHSET).
 - unfold Id_H, Const_plus_H.
   apply is_omega_cocont_BinCoproduct_of_functors.
-  + apply functor_category_has_homsets.
-  + apply is_omega_cocont_constant_functor; apply functor_category_has_homsets.
+  + apply is_omega_cocont_constant_functor.
   + apply is_omega_cocont_Lam_S.
 - apply ColimsFunctorCategory_of_shape; apply ColimsHSET_of_shape.
 Defined.
@@ -77,7 +72,7 @@ Defined.
 (* apply RightKanExtension_from_limits, LimsHSET. *)
 (* Defined. *)
 
-Definition LamHSS_Initial_HSET : Initial (hss_precategory BinCoproductsHSET Lam_S).
+Definition LamHSS_Initial_HSET : Initial (hss_category BinCoproductsHSET Lam_S).
 Proof.
 apply InitialHSS.
 - apply InitialHSET.
@@ -88,7 +83,6 @@ Defined.
 Definition LamMonad : Monad HSET.
 Proof.
 use Monad_from_hss.
-- apply has_homsets_HSET.
 - apply BinCoproductsHSET.
 - apply Lam_S.
 - apply LamHSS_Initial_HSET.

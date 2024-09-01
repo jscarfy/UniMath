@@ -26,15 +26,15 @@ Require Export UniMath.CategoryTheory.Core.NaturalTransformations.
 
 Require Export UniMath.CategoryTheory.Monics.
 Require Export UniMath.CategoryTheory.Epis.
-Require Export UniMath.CategoryTheory.limits.zero.
-Require Export UniMath.CategoryTheory.limits.kernels.
-Require Export UniMath.CategoryTheory.limits.cokernels.
-Require Export UniMath.CategoryTheory.limits.binproducts.
-Require Export UniMath.CategoryTheory.limits.bincoproducts.
-Require Export UniMath.CategoryTheory.limits.pullbacks.
-Require Export UniMath.CategoryTheory.limits.pushouts.
-Require Export UniMath.CategoryTheory.limits.BinDirectSums.
-Require Export UniMath.CategoryTheory.limits.Opp.
+Require Export UniMath.CategoryTheory.Limits.Zero.
+Require Export UniMath.CategoryTheory.Limits.Kernels.
+Require Export UniMath.CategoryTheory.Limits.Cokernels.
+Require Export UniMath.CategoryTheory.Limits.BinProducts.
+Require Export UniMath.CategoryTheory.Limits.BinCoproducts.
+Require Export UniMath.CategoryTheory.Limits.Pullbacks.
+Require Export UniMath.CategoryTheory.Limits.Pushouts.
+Require Export UniMath.CategoryTheory.Limits.BinDirectSums.
+Require Export UniMath.CategoryTheory.Limits.Opp.
 Require Export UniMath.CategoryTheory.CategoriesWithBinOps.
 Require Export UniMath.CategoryTheory.opp_precat.
 Require Export UniMath.CategoryTheory.PrecategoriesWithAbgrops.
@@ -85,7 +85,7 @@ Section Categories.
   Definition isPullback' {M:category} {a b c d : M} (f : b --> a) (g : c --> a)
              (p1 : d --> b) (p2 : d --> c) : hProp.
   Proof.
-    exists (∑ (H : p1 · f = p2· g), isPullback f g p1 p2 H).
+    exists (∑ (H : p1 · f = p2· g), isPullback (*f g p1 p2*) H).
     exact (_P_ (oppositeCategory M) a b c d f g p1 p2).
   Defined.
   Lemma isPullback'_up_to_z_iso {M:category} {a b c d d' : M}
@@ -151,22 +151,31 @@ Section MorphismPairs.
 End MorphismPairs.
 
 Section Pullbacks.              (* move upstream *)
-  Definition IsoArrowTo {M : precategory}     {A A' B:M} (g : A --> B) (g' : A' --> B) := ∑ i : z_iso A A', i · g' = g .
-  Coercion IsoArrowTo_pr1 {M : precategory}   {A A' B:M} (g : A --> B) (g' : A' --> B) : IsoArrowTo g g' -> z_iso A A' := pr1.
-  Definition IsoArrowFrom {M : precategory}   {A B B':M} (g : A --> B) (g' : A --> B') := ∑ i : z_iso B B', g · i  = g'.
-  Coercion IsoArrowFrom_pr1 {M : precategory} {A B B':M} (g : A --> B) (g' : A --> B') : IsoArrowFrom g g' -> z_iso B B' := pr1.
+
+  Local Open Scope type.
+
+  Definition IsoArrowTo {M : category}     {A A' B:M} (g : A --> B) (g' : A' --> B) := ∑ i : z_iso A A', i · g' = g.
+  #[reversible=no] Coercion IsoArrowTo_pr1 {M : category}   {A A' B:M} (g : A --> B) (g' : A' --> B) : IsoArrowTo g g' -> z_iso A A' := pr1.
+
+  Definition IsoArrowFrom {M : category}   {A B B':M} (g : A --> B) (g' : A --> B') := ∑ i : z_iso B B', g · i  = g'.
+  #[reversible=no] Coercion IsoArrowFrom_pr1 {M : category} {A B B':M} (g : A --> B) (g' : A --> B') : IsoArrowFrom g g' -> z_iso B B' := pr1.
   (* this definition of IsoArrow is asymmetric *)
-  Definition IsoArrow {M : precategory}       {A A' B B':M} (g : A --> B) (g' : A' --> B') := ∑ (i : z_iso A A') (j : z_iso B B'), i · g' = g · j.
-  Definition pullbackiso1 {M : precategory} {A B C:M} {f : A --> C} {g : B --> C}
+
+  Definition IsoArrow {M : category}       {A A' B B':M} (g : A --> B) (g' : A' --> B') := ∑ (i : z_iso A A') (j : z_iso B B'), i · g' = g · j.
+
+  Definition pullbackiso1 {M : category} {A B C:M} {f : A --> C} {g : B --> C}
         (pb : Pullback f g) (pb' : Pullback f g)
     : IsoArrowTo (PullbackPr1 pb) (PullbackPr1 pb')
-    := pr1 (pullbackiso pb pb'),,pr12 (pullbackiso pb pb').
-  Definition pullbackiso2 {M : precategory} {A B C:M} {f : A --> C} {g : B --> C}
+    := pr1 (pullbackiso _ pb pb'),,pr12 (pullbackiso _ pb pb').
+
+  Definition pullbackiso2 {M : category} {A B C:M} {f : A --> C} {g : B --> C}
         (pb : Pullback f g) (pb' : Pullback f g)
     : IsoArrowTo (PullbackPr2 pb) (PullbackPr2 pb')
-    := pr1 (pullbackiso pb pb'),,pr22 (pullbackiso pb pb').
+    := pr1 (pullbackiso _ pb pb'),,pr22 (pullbackiso _ pb pb').
+
   Section OppositeIsoArrows.
-    Definition opposite_IsoArrowTo {M:precategory} {A A' B:M} {g : A --> B} {g' : A' --> B} :
+
+    Definition opposite_IsoArrowTo {M:category} {A A' B:M} {g : A --> B} {g' : A' --> B} :
       IsoArrowTo g g' -> IsoArrowFrom (M:=M^op) g' g.
     Proof.
       intros i.
@@ -175,14 +184,14 @@ Section Pullbacks.              (* move upstream *)
       - exact (opp_z_iso (pr1 i)).
       - cbn. exact (pr2 i).
     Defined.
-    Definition opposite_IsoArrowFrom {M:precategory} {A B B':M} {g : A --> B} {g' : A --> B'} :
+    Definition opposite_IsoArrowFrom {M:category} {A B B':M} {g : A --> B} {g' : A --> B'} :
       IsoArrowFrom g g' -> IsoArrowTo (M:=M^op) g' g.
     Proof.
       intros i. use tpair.
       - exact (opp_z_iso (pr1 i)).
       - cbn. exact (pr2 i).
     Defined.
-    Definition opposite_IsoArrow {M:precategory} {A A' B B':M} (g : A --> B) (g' : A' --> B') :
+    Definition opposite_IsoArrow {M:category} {A A' B B':M} (g : A --> B) (g' : A' --> B') :
       IsoArrow g g' -> IsoArrow (M:=M^op) (opp_mor g') (opp_mor g).
     Proof.
       intros i.
@@ -198,7 +207,6 @@ Section Pullbacks.              (* move upstream *)
     - intro. apply homset_property.
     - induction k as [[k K] e], k' as [[k' K'] e']; cbn; cbn in e, e'.
       induction (i A k k' (e @ !e')). apply maponpaths. apply isaprop_is_z_isomorphism.
-      apply homset_property.
   Qed.
   Lemma IsoArrowFrom_isaprop (M : category) {A B B':M} (g : A --> B) (g' : A --> B') :
      isEpi g -> isaprop (IsoArrowFrom g g').
@@ -207,7 +215,7 @@ Section Pullbacks.              (* move upstream *)
     { intros j. apply homset_property. }
     induction k as [[k K] e], k' as [[k' K'] e']; cbn; cbn in e, e'.
     apply subtypePath; cbn.
-    { intros f. apply isaprop_is_z_isomorphism. apply homset_property. }
+    { intros f. apply isaprop_is_z_isomorphism. }
     use i. exact (e @ !e').
   Qed.
 End Pullbacks.
@@ -330,15 +338,16 @@ Section PreAdditive.
            (category_to_precategory (categoryWithAbgrops_category _))
            (precategoryWithBinOps_precategory (categoryWithAbgrops_precategoryWithBinOps _))
          *)
-        Fail rewrite e.
-        unfold categoryWithAbgrops_category, category_to_precategory, pr1 in e.
         rewrite e.
+(*        unfold  category_to_precategory, pr1 in e.
+        rewrite e.
+*)
         rewrite assoc. rewrite b. apply zeroLeft.
       - intros T h v. rewrite assoc' in v.
         assert (Q := co T (j·h) v); cbn in Q. generalize Q; clear Q.
         apply iscontrweqb. use make_weq.
-        + intros [k w]; exists (j'·k); abstract (rewrite assoc; unfold categoryWithAbgrops_category, category_to_precategory, pr1 in e; rewrite <- e; rewrite assoc';
-          rewrite w; reflexivity) using _L_.
+        + intros [k w]; exists (j'·k). rewrite assoc. rewrite <- e. rewrite assoc'.
+          rewrite w. reflexivity.
         + cbn beta. intros [l w]; unfold hfiber. assert (PO := po T h l (!w)); clear po.
           generalize PO; clear PO. apply iscontrweqb.
           refine (weqcomp (weqtotal2asstor _ _) _). apply weqfibtototal; intros m. cbn.
@@ -366,8 +375,8 @@ Section PreAdditive.
   Lemma KernelIsMonic {M:PreAdditive} {x y z:M} (f : x --> y) (g : y --> z) : isKernel' f g -> isMonic f.
   Proof.
     intros [t i] w p q e.
-    set (T := ∑ r : w --> x, r · f = q · f). assert (ic : isProofIrrelevant T).
-    { apply proofirrelevance, isapropifcontr.
+    set (T := ∑ r : w --> x, r · f = q · f). assert (ic : ∏ t1 t2 : T, t1 = t2).
+    { apply proofirrelevancecontr.
       use i. rewrite assoc'. rewrite t. apply zeroRight. }
     set (t1 := (p,,e) : T). set (t2 := (q,,idpath _) : T).
     assert (Q := ic t1 t2). exact (maponpaths pr1 Q).
@@ -384,7 +393,9 @@ Section PreAdditive.
     intros im eq ex. exists eq. intros w h e.
     apply iscontraprop1.
     - apply invproofirrelevance; intros [r R] [s S].
-      apply subtypePath_prop; simpl. apply im. exact (R@!S).
+      Unset Printing Notations. Arguments paths _ _ _ : clear implicits.
+      try assumption.
+      refine (@subtypePath_prop _ _ (_,,_) (_,,_) _); simpl. apply im. exact (R@!S).
     - apply ex. exact e.
   Qed.
   Definition makeEpiCokernel {M:PreAdditive} {x y z : M} (f : x --> y) (g : y --> z) :
@@ -402,7 +413,7 @@ Section PreAdditive.
     - exact (KernelIsMonic _ _ i).
     - exact (assoc _ _ _ @ maponpaths (postcomp_with _) (pr1 i) @ zeroLeft h).
     - intros w k e. apply (pr2 i).
-      refine (post_comp_with_iso_is_inj _ _ _ h (is_iso_from_is_z_iso h j) _ _ _ _).
+      refine (post_comp_with_iso_is_inj _ _ h (is_iso_from_is_z_iso h j) _ _ _ _).
       refine (! assoc _ _ _ @ e @ ! zeroLeft _).
   Qed.
   Lemma IsoWithCokernel {M:PreAdditive} {x x' y z:M} (f : x --> y) (g : y --> z) (h : x' --> x) :
@@ -503,7 +514,7 @@ Section PreAdditive.
   Definition ismonoidfun_prop {G H:abgr} (f:G->H) : hProp := make_hProp (ismonoidfun f) (isapropismonoidfun f).
   Definition PreAdditive_functor (M N:PreAdditive) :=
     ∑ F : M ⟶ N, ∀ A B:M, ismonoidfun_prop (@functor_on_morphisms M N F A B : A --> B -> F A --> F B).
-  Coercion PreAdditive_functor_to_functor {M N:PreAdditive} : PreAdditive_functor M N -> functor M N := pr1.
+  #[reversible=no] Coercion PreAdditive_functor_to_functor {M N:PreAdditive} : PreAdditive_functor M N -> functor M N := pr1.
   Definition functor_on_morphisms_add {C C' : PreAdditive} (F : PreAdditive_functor C C') { a b : C}
     : monoidfun (a --> b) (F a --> F b)
     := monoidfunconstr (pr2 F a b).
@@ -871,21 +882,21 @@ End KernelCokernelPairs.
 
 Section theDefinition.
   Definition ExactCategoryData := ∑ M:AdditiveCategory, MorphismPair M -> hProp. (* properties added below *)
-  Coercion ExactCategoryDataToAdditiveCategory (ME : ExactCategoryData) : AdditiveCategory := pr1 ME.
+  #[reversible=no] Coercion ExactCategoryDataToAdditiveCategory (ME : ExactCategoryData) : AdditiveCategory := pr1 ME.
   Definition isExact {M : ExactCategoryData} (E : MorphismPair M) : hProp := pr2 M E.
   Definition isExact2 {M : ExactCategoryData} {A B C:M} (f:A-->B) (g:B-->C) := isExact (make_MorphismPair f g).
   Definition isAdmissibleMonomorphism {M : ExactCategoryData} {A B:M} (i : A --> B) : hProp :=
     ∃ C (p : B --> C), isExact2 i p.
   Definition AdmissibleMonomorphism {M : ExactCategoryData} (A B:M) : Type :=
     ∑ (i : A --> B), isAdmissibleMonomorphism i.
-  Coercion AdmMonoToMap  {M : ExactCategoryData} {A B:M} : AdmissibleMonomorphism A B ->  A --> B := pr1.
-  Coercion AdmMonoToMap' {M : ExactCategoryData} {A B:M} : AdmissibleMonomorphism A B -> (A --> B)%cat := pr1.
+  #[reversible=no] Coercion AdmMonoToMap  {M : ExactCategoryData} {A B:M} : AdmissibleMonomorphism A B ->  A --> B := pr1.
+  #[reversible=no] Coercion AdmMonoToMap' {M : ExactCategoryData} {A B:M} : AdmissibleMonomorphism A B -> (A --> B)%cat := pr1.
   Definition isAdmissibleEpimorphism {M : ExactCategoryData} {B C:M} (p : B --> C) : hProp :=
     ∃ A (i : A --> B), isExact2 i p.
   Definition AdmissibleEpimorphism {M : ExactCategoryData} (B C:M) : Type :=
     ∑ (p : B --> C), isAdmissibleEpimorphism p.
-  Coercion AdmEpiToMap  {M : ExactCategoryData} {B C:M} : AdmissibleEpimorphism B C ->  B --> C := pr1.
-  Coercion AdmEpiToMap' {M : ExactCategoryData} {B C:M} : AdmissibleEpimorphism B C -> (B --> C)%cat := pr1.
+  #[reversible=no] Coercion AdmEpiToMap  {M : ExactCategoryData} {B C:M} : AdmissibleEpimorphism B C ->  B --> C := pr1.
+  #[reversible=no] Coercion AdmEpiToMap' {M : ExactCategoryData} {B C:M} : AdmissibleEpimorphism B C -> (B --> C)%cat := pr1.
   Lemma ExactToAdmMono {M : ExactCategoryData} {A B C:M} {i : A --> B} {p : B --> C} : isExact2 i p -> isAdmissibleMonomorphism i.
   Proof.
     intros e. exact (hinhpr(C,,p,,e)).
@@ -936,7 +947,7 @@ Section theDefinition.
         (∀ (A B C:M) (i:A-->B) (j:B-->C),
           hasKernel j ⇒ isAdmissibleEpimorphism (i·j) ⇒ isAdmissibleEpimorphism j)).
   Definition ExactCategory := ∑ (ME:ExactCategoryData), ExactCategoryProperties ME.
-  Coercion ExactCategoryToData (M:ExactCategory) : ExactCategoryData := pr1 M.
+  #[reversible=no] Coercion ExactCategoryToData (M:ExactCategory) : ExactCategoryData := pr1 M.
   Definition make_ExactCategory (ME:ExactCategoryData) (p : ExactCategoryProperties ME) : ExactCategory := ME,,p.
   Definition isExactFunctor {M N:ExactCategory} (F : M ⟶ N) : hProp
     := ∀ (P : MorphismPair M), isExact P ⇒ isExact (applyFunctorToPair F P).
@@ -945,11 +956,11 @@ Section theDefinition.
   (* TO DO : show an exact functor is additive, or else include that as a condition.
      That includes showing it induces monoid functions on Hom groups.
      Start by defining preadditive functors and additive functors. *)
-  Coercion ExactFunctorToFunctor {M N:ExactCategory}
+  #[reversible=no] Coercion ExactFunctorToFunctor {M N:ExactCategory}
     : ExactFunctor M N -> (M ⟶ N)
     := pr1.
   Definition ShortExactSequence (M:ExactCategory) := ∑ (P : MorphismPair M), isExact P.
-  Coercion ShortExactSequenceToMorphismPair {M:ExactCategory} (P : ShortExactSequence M)
+  #[reversible=no] Coercion ShortExactSequenceToMorphismPair {M:ExactCategory} (P : ShortExactSequence M)
     : MorphismPair M
     := pr1 P.
   Definition ShortExactSequenceMap {M:ExactCategory} (P Q:ShortExactSequence M) := MorphismPairMap P Q.
@@ -1154,7 +1165,7 @@ Section ExactCategoryFacts.
     isPullback' (M:=M) f g h k -> isAdmissibleEpimorphism f -> isAdmissibleEpimorphism k.
   (* dual needed *)
   Proof.
-    intros pb. exact (PullbackEpiIsEpi f g (make_Pullback _ _ _ _ _ _ (pr2 pb))).
+    intros pb. exact (PullbackEpiIsEpi f g (make_Pullback _ (pr2 pb))).
   Qed.
   Lemma IsIsoIsMono {M : ExactCategory} {A B:M} (f:A-->B) :
     is_z_isomorphism f -> isAdmissibleMonomorphism f.
@@ -1287,7 +1298,7 @@ Section ExactCategoryFacts.
   Lemma MonicAdmEpiIsIso {M : ExactCategory} {A B:M} (p : A ↠ B) : isMonic p -> is_z_isomorphism p.
   Proof.
     induction p as [p E]. cbn. intros I. apply (squash_to_prop E).
-    { apply isaprop_is_z_isomorphism. apply to_has_homsets. }
+    { apply (isaprop_is_z_isomorphism (C:=M)). }
     clear E; intros [K [i E]].
     assert (Q := EC_ExactToKernelCokernel E); clear E.
     induction Q as [ke co];
@@ -1493,7 +1504,7 @@ Section ExactCategoryFacts.
   Qed.
   Lemma MapPlusIdentityToPullback {M:ExactCategory} {A B:M} (f:A-->B) (C:M)
         (AC : BinDirectSum A C) (BC : BinDirectSum B C) :
-    isPullback _ _ _ _ (MapPlusIdentityToCommSq f C AC BC).
+    isPullback (MapPlusIdentityToCommSq f C AC BC).
   Proof.
     intros T g h e. apply iscontraprop1.
     - apply invproofirrelevance. intros [p [P P']] [q [Q Q']].
@@ -1552,7 +1563,7 @@ Section ExactCategoryFacts.
     clear e' e s q.
     apply (squash_to_hProp hc); clear hc; intros [D [k ic]].
     apply (squash_to_hProp (to_hasBinDirectSums D C)); intros DC.
-    assert (PB := is_symmetric_isPullback (homset_property M) _ (MapPlusIdentityToPullback k C BC DC)).
+    assert (PB := is_symmetric_isPullback _ (MapPlusIdentityToPullback k C BC DC)).
     assert (co := CokernelPlusIdentity i k C BC DC ic).
     assert (es := ExactSequenceFromMono _ _ co); clear co.
     assert (t : i · to_In1 BC = ToBinDirectSum BC i 0).
@@ -1618,6 +1629,9 @@ Section ExactCategoryFacts.
       - exact e3.
     Defined.
   End Tmp.
+
+
+
   Lemma KernelSequence {M:ExactCategory} {A B C P R:M}
         (i : B --> A) (j : C --> B) (p : P --> B) (q : R --> C) :
     isExact2 p i -> isExact2 q j ->
@@ -1626,6 +1640,8 @@ Section ExactCategoryFacts.
   Proof.
     exact (CokernelSequence (M := oppositeExactCategory M) i j p q).
   Defined.
+
+
   Lemma ExactIso3 {M:ExactCategory} {A B C C':M} (i:A-->B) (p:B-->C) (t:z_iso C C') :
     isExact2 i p -> isExact2 i (p·t).
   Proof.
@@ -1802,7 +1818,7 @@ Section SplitSequences.
     apply makeMonicKernel.
     - apply to_In1_isMonic.
     - exact (to_Unel1 AB).
-    - intros T h e. exists (h · π₁). unfold eqset; cbn. refine (_ @ id_right _).
+    - intros T h e. exists (h · π₁). refine (_ @ id_right _).
       rewrite <- (to_BinOpId AB). rewrite rewrite_op. rewrite rightDistribute.
       rewrite assoc'. rewrite (assoc _ π₂ _). rewrite e. rewrite zeroLeft. rewrite runax. reflexivity.
   Defined.
@@ -1811,7 +1827,7 @@ Section SplitSequences.
     apply makeEpiCokernel.
     - apply to_Pr2_isEpi.
     - exact (to_Unel1 AB).
-    - intros T h e. exists (ι₂ · h). unfold eqset; cbn. refine (_ @ id_left _).
+    - intros T h e. exists (ι₂ · h). refine (_ @ id_left _).
       rewrite <- (to_BinOpId AB). rewrite rewrite_op. rewrite leftDistribute.
       rewrite assoc. rewrite (assoc' _ ι₁ _). rewrite e. rewrite zeroRight. rewrite lunax. reflexivity.
   Defined.
@@ -1840,7 +1856,7 @@ Section SplitSequences.
     apply hinhpr.
     exists (q' · p').
     exists (π₁ · i' · j + π₂ · j').
-    repeat split; unfold eqset; cbn; rewrite ? rewrite_op.
+    repeat split; rewrite ? rewrite_op.
     { rewrite assoc'. rewrite (assoc j). rewrite (to_IdIn1 jq). rewrite id_left.
       rewrite (to_IdIn1 ip). reflexivity. }
     { rewrite rightDistribute, 2 leftDistribute.
@@ -2011,6 +2027,8 @@ Section InducedExactCategory.
     apply funextsec; intro S.
     apply isapropishinh.
   Qed.
+
+
   Goal ∏ {M:ExactCategory} {X:Type} (j : X -> ob M) (ce : exts_lift M j),
     oppositeExactCategoryData (induced_ExactCategoryData j ce) =
     induced_ExactCategoryData (M:=oppositeExactCategory M) j (opp_exts_lift j ce).
@@ -2025,6 +2043,7 @@ Section InducedExactCategory.
       + intros ex. admit.
       + intros ex. admit.
   Abort.
+
   Definition induced_ExactCategoryProperties {M:ExactCategory} {X:Type}
              (j : X -> ob M) (ce : exts_lift M j) :
     ExactCategoryProperties (induced_ExactCategoryData j ce).

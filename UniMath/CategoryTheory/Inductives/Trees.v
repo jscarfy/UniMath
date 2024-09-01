@@ -16,17 +16,17 @@ Require Import UniMath.MoreFoundations.Tactics.
 
 Require Import UniMath.CategoryTheory.Core.Categories.
 Require Import UniMath.CategoryTheory.Core.Functors.
-Require Import UniMath.CategoryTheory.limits.graphs.colimits.
-Require Import UniMath.CategoryTheory.categories.HSET.Core.
-Require Import UniMath.CategoryTheory.categories.HSET.Limits.
-Require Import UniMath.CategoryTheory.categories.HSET.Colimits.
-Require Import UniMath.CategoryTheory.limits.initial.
+Require Import UniMath.CategoryTheory.Limits.Graphs.Colimits.
+Require Import UniMath.CategoryTheory.Categories.HSET.Core.
+Require Import UniMath.CategoryTheory.Categories.HSET.Limits.
+Require Import UniMath.CategoryTheory.Categories.HSET.Colimits.
+Require Import UniMath.CategoryTheory.Limits.Initial.
 Require Import UniMath.CategoryTheory.FunctorAlgebras.
-Require Import UniMath.CategoryTheory.limits.binproducts.
-Require Import UniMath.CategoryTheory.limits.terminal.
+Require Import UniMath.CategoryTheory.Limits.BinProducts.
+Require Import UniMath.CategoryTheory.Limits.Terminal.
 Require Import UniMath.CategoryTheory.Chains.All.
 Require Import UniMath.CategoryTheory.exponentials.
-Require Import UniMath.CategoryTheory.limits.bincoproducts.
+Require Import UniMath.CategoryTheory.Limits.BinCoproducts.
 Require Import UniMath.CategoryTheory.Inductives.Lists.
 
 Local Open Scope cat.
@@ -45,9 +45,9 @@ Let treeFunctor : functor HSET HSET := pr1 treeOmegaFunctor.
 Let is_omega_cocont_treeFunctor : is_omega_cocont treeFunctor := pr2 treeOmegaFunctor.
 
 Lemma treeFunctor_Initial :
-  Initial (precategory_FunctorAlg treeFunctor has_homsets_HSET).
+  Initial (category_FunctorAlg treeFunctor).
 Proof.
-apply (colimAlgInitial _ InitialHSET is_omega_cocont_treeFunctor (ColimCoconeHSET _ _)).
+apply (colimAlgInitial InitialHSET is_omega_cocont_treeFunctor (ColimCoconeHSET _ _)).
 Defined.
 
 (** The type of binary trees *)
@@ -107,7 +107,7 @@ Defined.
 (* Maybe quantify over "λ _ : unit, x" instead of nil? *)
 Lemma foldr_leaf (X : hSet) (x : X) (f : pr1 A × X × X -> X) : foldr X x f leaf = x.
 Proof.
-assert (F := maponpaths (λ x, BinCoproductIn1 _ (BinCoproductsHSET _ _) · x)
+assert (F := maponpaths (λ x, BinCoproductIn1 (BinCoproductsHSET _ _) · x)
                         (algebra_mor_commutes _ _ _ (foldr_map X x f))).
 apply (toforallpaths _ _ _ F tt).
 Qed.
@@ -116,7 +116,7 @@ Lemma foldr_node (X : hSet) (x : X) (f : pr1 A × X × X -> X)
                  (a : pr1 A) (l1 l2 : pr1 Tree) :
   foldr X x f (node (a,,l1,,l2)) = f (a,,foldr X x f l1,,foldr X x f l2).
 Proof.
-assert (F := maponpaths (λ x, BinCoproductIn2 _ (BinCoproductsHSET _ _)· x)
+assert (F := maponpaths (λ x, BinCoproductIn2 (BinCoproductsHSET _ _)· x)
                         (algebra_mor_commutes _ _ _ (foldr_map X x f))).
 assert (Fal := toforallpaths _ _ _ F (a,,l1,,l2)).
 clear F.
@@ -164,8 +164,6 @@ apply BinCoproductArrow_eq_cor.
   apply (maponpaths pr1 (foldr_node P'HSET P0' Pc' a l1 l2)).
 Qed.
 
-Transparent is_omega_cocont_treeFunctor.
-
 Definition pr1foldr_algmor : algebra_mor _ Tree_alg Tree_alg :=
   tpair _ _ isalghom_pr1foldr.
 
@@ -174,10 +172,12 @@ Proof.
 now rewrite (@InitialEndo_is_identity _ treeFunctor_Initial pr1foldr_algmor).
 Qed.
 
+Transparent is_omega_cocont_treeFunctor.
+
 Lemma treeInd l : P l.
 Proof.
 assert (H : pr1 (foldr P'HSET P0' Pc' l) = l).
-  apply (toforallpaths _ _ _ (!pr1foldr_algmor_identity) l).
+  apply (toforallpaths _ _ _ (maponpaths pr1 (!pr1foldr_algmor_identity)) l).
 rewrite <- H.
 apply (pr2 (foldr P'HSET P0' Pc' l)).
 Defined.

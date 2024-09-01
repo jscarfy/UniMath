@@ -30,15 +30,15 @@ Require Import UniMath.CategoryTheory.Core.Functors.
 Require Import UniMath.CategoryTheory.FunctorCategory.
 Require Import UniMath.CategoryTheory.FunctorAlgebras.
 
-Require Import UniMath.CategoryTheory.categories.HSET.Core.
-Require Import UniMath.CategoryTheory.categories.HSET.Limits.
-Require Import UniMath.CategoryTheory.categories.HSET.Colimits.
+Require Import UniMath.CategoryTheory.Categories.HSET.Core.
+Require Import UniMath.CategoryTheory.Categories.HSET.Limits.
+Require Import UniMath.CategoryTheory.Categories.HSET.Colimits.
 
-Require Import UniMath.CategoryTheory.limits.initial.
-Require Import UniMath.CategoryTheory.limits.graphs.colimits.
-Require Import UniMath.CategoryTheory.limits.binproducts.
-Require Import UniMath.CategoryTheory.limits.bincoproducts.
-Require Import UniMath.CategoryTheory.limits.terminal.
+Require Import UniMath.CategoryTheory.Limits.Initial.
+Require Import UniMath.CategoryTheory.Limits.Graphs.Colimits.
+Require Import UniMath.CategoryTheory.Limits.BinProducts.
+Require Import UniMath.CategoryTheory.Limits.BinCoproducts.
+Require Import UniMath.CategoryTheory.Limits.Terminal.
 
 Require Import UniMath.CategoryTheory.Chains.OmegaCocontFunctors.
 Require Import UniMath.CategoryTheory.Chains.Chains.
@@ -55,17 +55,23 @@ Local Infix "⊗" := times.
 Variable (vars : hSet).
 
 (**
-  <<
+<<
     PL_functor Var Rec :=
         Var            (* -- arity 1, sentences *)
       + Rec            (* -- arity 1, ¬ (not) *)
       + (Rec × Rec)    (* -- arity 2, ∧ (and) *)
       + (Rec × Rec)    (* -- arity 2, ∨ (or) *)
       + (Rec × Rec)    (* -- arity 2, → (implies) *)
-   >>
+>>
  *)
+
+Definition PL_functor : omega_cocont_functor HSET HSET :=
+  (omega_cocont_constant_functor (vars : HSET)) + Id + (Id * Id) + (Id * Id) + (Id * Id).
+
+(*
 Definition PL_functor : omega_cocont_functor HSET HSET :=
   ' vars + Id + (Id * Id) + (Id * Id) + (Id * Id).
+ *)
 
 (** The following three statements are crucial for performance. *)
 Definition PL_functor' : functor HSET HSET := pr1 PL_functor.
@@ -73,9 +79,9 @@ Let is_omega_cocont_PL_functor' : is_omega_cocont PL_functor' := pr2 PL_functor.
 Opaque is_omega_cocont_PL_functor'.
 
 Lemma PL_functor_initial :
-  Initial (precategory_FunctorAlg PL_functor' has_homsets_HSET).
+  Initial (category_FunctorAlg PL_functor').
 Proof.
-  apply (colimAlgInitial _ InitialHSET is_omega_cocont_PL_functor' (ColimCoconeHSET _ _)).
+  apply (colimAlgInitial InitialHSET is_omega_cocont_PL_functor' (ColimCoconeHSET _ _)).
 Defined.
 
 Let PL_alg : algebra_ob PL_functor' := InitialObject PL_functor_initial.
@@ -130,7 +136,7 @@ Infix "∨" := (PL_or) : PL.
 Infix "⇒" := (PL_impl) : PL.
 Infix "⇔" := (PL_iff_fun) (at level 90) : PL.
 
-Definition PL_mk_algebra (X : hSet) (vs : vars -> X) (not : X -> X)
+Definition make_PL_algebra (X : hSet) (vs : vars -> X) (not : X -> X)
            (and : X -> X -> X) (or : X -> X -> X) (impl : X -> X -> X) :
   algebra_ob PL_functor'.
 Proof.
@@ -148,14 +154,14 @@ Defined.
     other set, we can construct an interpretation of PL in that set. *)
 Definition PL_fold_alg_mor {X : hSet} (vs : vars -> X)
            (not : X -> X) (and : X -> X -> X) (or : X -> X -> X) (impl : X -> X -> X) :
-  algebra_mor PL_functor' PL_alg (PL_mk_algebra X vs not and or impl).
+  algebra_mor PL_functor' PL_alg (make_PL_algebra X vs not and or impl).
 Proof.
-  apply (InitialArrow PL_functor_initial (PL_mk_algebra X vs not and or impl)).
+  apply (InitialArrow PL_functor_initial (make_PL_algebra X vs not and or impl)).
 Defined.
 
 Definition PL_fold {X : hSet} (vs : vars -> X)
            (not : X -> X) (and : X -> X -> X) (or : X -> X -> X) (impl : X -> X -> X) :
-  PL -> X := mor_from_algebra_mor _ _ _ (PL_fold_alg_mor vs not and or impl).
+  PL -> X := mor_from_algebra_mor _ (PL_fold_alg_mor vs not and or impl).
 
 (** Some lemmas expressing the computational behavior of [PL_fold] *)
 Section FoldComputationLemmas.

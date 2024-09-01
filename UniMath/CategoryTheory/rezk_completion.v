@@ -28,8 +28,8 @@ Require Import UniMath.CategoryTheory.Core.Categories.
 Require Import UniMath.CategoryTheory.Core.Univalence.
 Require Import UniMath.CategoryTheory.Core.Functors.
 Local Open Scope cat.
-Require Import UniMath.CategoryTheory.categories.HSET.Core.
-Require Import UniMath.CategoryTheory.categories.HSET.Univalence.
+Require Import UniMath.CategoryTheory.Categories.HSET.Core.
+Require Import UniMath.CategoryTheory.Categories.HSET.Univalence.
 Require Import UniMath.CategoryTheory.opp_precat.
 Require Import UniMath.CategoryTheory.yoneda.
 Require Import UniMath.CategoryTheory.Subcategory.Core.
@@ -43,30 +43,36 @@ Require Import UniMath.CategoryTheory.precomp_ess_surj.
 
 Section rezk.
 
-Variable A : precategory.
-Hypothesis hsA: has_homsets A.
+  Context (A : category).
+
+Definition category_Rezk_completion : category.
+Proof.
+  exists (full_img_sub_precategory (yoneda A)).
+  exact (has_homsets_full_img_sub_precategory (yoneda A)).
+Defined.
+
 
 Definition Rezk_completion : univalent_category.
 Proof.
-  exists (full_img_sub_precategory (yoneda A hsA)).
-  apply is_univalent_full_subcat.
+  exists category_Rezk_completion.
+  apply is_univalent_full_sub_category.
   apply (is_univalent_functor_category _ _ is_univalent_HSET).
 Defined.
 
 Definition Rezk_eta : functor A Rezk_completion.
 Proof.
-  apply (functor_full_img (yoneda A hsA)).
+  apply (functor_full_img (yoneda A)).
 Defined.
 
 Lemma Rezk_eta_fully_faithful : fully_faithful Rezk_eta.
 Proof.
-  apply (functor_full_img_fully_faithful_if_fun_is _ _ (yoneda A hsA)).
+  apply (functor_full_img_fully_faithful_if_fun_is _ _ (yoneda A)).
   apply yoneda_fully_faithful.
 Defined.
 
 Lemma Rezk_eta_essentially_surjective : essentially_surjective Rezk_eta.
 Proof.
-  apply (functor_full_img_essentially_surjective _ _ (yoneda A hsA)).
+  apply (functor_full_img_essentially_surjective _ _ (yoneda A)).
 Defined.
 
 End rezk.
@@ -76,7 +82,7 @@ End rezk.
 Definition functor_from (C : precategory) : UU
   := ∑ D : univalent_category, functor C D.
 
-Coercion target_category (C : precategory) (X : functor_from C) : univalent_category := pr1 X.
+#[reversible=no] Coercion target_category (C : precategory) (X : functor_from C) : univalent_category := pr1 X.
 Definition func_functor_from {C : precategory} (X : functor_from C) : functor C X := pr2 X.
 
 Definition is_initial_functor_from (C : precategory) (X : functor_from C) : UU
@@ -86,50 +92,45 @@ Definition is_initial_functor_from (C : precategory) (X : functor_from C) : UU
 
 Section rezk_universal_property.
 
-Variables A : precategory.
-Hypothesis hsA: has_homsets A.
+  Context (A : category).
 
 Section fix_a_category.
 
-Variable C : precategory.
-Hypothesis Ccat : is_univalent C.
+  Context (C : category) (Ccat : is_univalent C).
 
 Lemma pre_comp_rezk_eta_is_fully_faithful :
-    fully_faithful (pre_composition_functor A (Rezk_completion A hsA) C
-                (pr2 (pr2 (Rezk_completion A hsA))) (pr2 Ccat) ((Rezk_eta A hsA))).
+  fully_faithful
+    (pre_composition_functor _ _  C (Rezk_eta A)).
 Proof.
   apply pre_composition_with_ess_surj_and_fully_faithful_is_fully_faithful.
-  apply Rezk_eta_essentially_surjective.
-  apply Rezk_eta_fully_faithful.
+  - apply Rezk_eta_essentially_surjective.
+  - apply Rezk_eta_fully_faithful.
 Defined.
 
 Lemma pre_comp_rezk_eta_is_ess_surj :
-   essentially_surjective (pre_composition_functor A (Rezk_completion A hsA) C
-   (pr2 (pr2 (Rezk_completion A hsA))) (pr2 Ccat)
-   (Rezk_eta A hsA)).
+  essentially_surjective (pre_composition_functor _ _ C (Rezk_eta A)).
 Proof.
   apply pre_composition_essentially_surjective.
-  apply Rezk_eta_essentially_surjective.
-  apply Rezk_eta_fully_faithful.
+  - apply Ccat.
+  - apply Rezk_eta_essentially_surjective.
+  - apply Rezk_eta_fully_faithful.
 Defined.
 
-Definition Rezk_adj_equiv : adj_equivalence_of_precats
-  (pre_composition_functor A (Rezk_completion A hsA) C
-       (pr2 (pr2 (Rezk_completion A hsA))) (pr2 Ccat)
-       (Rezk_eta A hsA)).
+Definition Rezk_adj_equiv : adj_equivalence_of_cats
+  (pre_composition_functor _ _ C (Rezk_eta A)).
 Proof.
-  apply (@rad_equivalence_of_precats
-           [Rezk_completion A hsA, C, pr2 Ccat]
-           [A, C, pr2 Ccat]
-           (is_univalent_functor_category _ _ _ )
+  apply (@rad_equivalence_of_cats
+           (functor_category (Rezk_completion A) C)
+           (functor_category A C)
+           (is_univalent_functor_category _ _ Ccat )
            _
            (pre_comp_rezk_eta_is_fully_faithful)
            (pre_comp_rezk_eta_is_ess_surj)).
 Defined.
 
+
 Theorem Rezk_eta_Universal_Property :
-  isweq (pre_composition_functor A (Rezk_completion A hsA) C
-   (pr2 (pr2 (Rezk_completion A hsA))) (pr2 Ccat) (Rezk_eta A hsA)).
+  isweq (pre_composition_functor _ _ C (Rezk_eta A)).
 Proof.
   apply adj_equiv_of_cats_is_weq_of_objects.
   - apply is_univalent_functor_category;
@@ -139,13 +140,13 @@ Proof.
   - apply Rezk_adj_equiv.
 Defined.
 
-Definition Rezk_weq : [Rezk_completion A hsA, C, pr2 Ccat] ≃ [A, C, pr2 Ccat ]
+Definition Rezk_weq : [Rezk_completion A, C] ≃ [A, C ]
   := make_weq _ Rezk_eta_Universal_Property.
 
 End fix_a_category.
 
 Lemma Rezk_initial_functor_from : is_initial_functor_from A
-      (tpair _ (Rezk_completion A hsA) (Rezk_eta A hsA)).
+      (tpair _ (Rezk_completion A) (Rezk_eta A)).
 Proof.
   intro D.
   destruct D as [D F].
@@ -174,22 +175,16 @@ End rezk_universal_property.
 
 Section opp_rezk_universal_property.
 
-Variables A : precategory.
-Hypothesis hsA: has_homsets A.
-
-Let hsAop : has_homsets A^op := has_homsets_opp hsA.
-Let hsRAop : has_homsets (Rezk_completion A hsA)^op :=
-           has_homsets_opp (pr2 (pr2 (Rezk_completion A hsA))).
+  Context (A : category).
 
 Section fix_a_category.
 
-Variable C : precategory.
-Hypothesis Ccat : is_univalent C.
+  Context (C : category) (Ccat : is_univalent C).
 
 Lemma pre_comp_rezk_eta_opp_is_fully_faithful :
     fully_faithful
-       (pre_composition_functor A^op (Rezk_completion A hsA)^op C
-                hsRAop (pr2 Ccat) (functor_opp (Rezk_eta A hsA))).
+       (pre_composition_functor A^op (Rezk_completion A)^op C
+                (functor_opp (Rezk_eta A))).
 Proof.
   apply pre_composition_with_ess_surj_and_fully_faithful_is_fully_faithful.
   - apply opp_functor_essentially_surjective.
@@ -200,10 +195,11 @@ Defined.
 
 Lemma pre_comp_rezk_eta_opp_is_ess_surj :
    essentially_surjective
-      (pre_composition_functor A^op (Rezk_completion A hsA)^op C
-           hsRAop (pr2 Ccat) (functor_opp (Rezk_eta A hsA))).
+      (pre_composition_functor A^op (Rezk_completion A)^op C
+                         (functor_opp (Rezk_eta A))).
 Proof.
   apply pre_composition_essentially_surjective.
+  - apply Ccat.
   - apply opp_functor_essentially_surjective.
     apply Rezk_eta_essentially_surjective.
   - apply opp_functor_fully_faithful.
@@ -211,22 +207,22 @@ Proof.
 Defined.
 
 Definition Rezk_op_adj_equiv :
- adj_equivalence_of_precats
-     (pre_composition_functor A^op (Rezk_completion A hsA)^op C hsRAop
-        (pr2 Ccat) (functor_opp (Rezk_eta A hsA))).
+ adj_equivalence_of_cats
+     (pre_composition_functor A^op (Rezk_completion A)^op C
+        (functor_opp (Rezk_eta A))).
 Proof.
-  apply (@rad_equivalence_of_precats
-           [(Rezk_completion A hsA)^op, C, pr2 Ccat]
-           [A^op, C, pr2 Ccat]
-           (is_univalent_functor_category _ _ _ )
+  apply (@rad_equivalence_of_cats
+           [(Rezk_completion A)^op, C]
+           [A^op, C]
+           (is_univalent_functor_category _ _ Ccat )
            _
            (pre_comp_rezk_eta_opp_is_fully_faithful)
            (pre_comp_rezk_eta_opp_is_ess_surj)).
 Defined.
 
 Theorem Rezk_eta_opp_Universal_Property :
-  isweq (pre_composition_functor A^op (Rezk_completion A hsA)^op C
-          hsRAop (pr2 Ccat) (functor_opp (Rezk_eta A hsA))).
+  isweq (pre_composition_functor A^op (Rezk_completion A)^op C
+          (functor_opp (Rezk_eta A))).
 Proof.
   apply adj_equiv_of_cats_is_weq_of_objects.
   - apply is_univalent_functor_category;
@@ -236,7 +232,7 @@ Proof.
   - apply Rezk_op_adj_equiv.
 Defined.
 
-Definition Rezk_opp_weq : [(Rezk_completion A hsA)^op, C, pr2 Ccat] ≃ [A^op, C, pr2 Ccat]
+Definition Rezk_opp_weq : [(Rezk_completion A)^op, C] ≃ [A^op, C]
   := make_weq _ Rezk_eta_opp_Universal_Property.
 
 End fix_a_category.

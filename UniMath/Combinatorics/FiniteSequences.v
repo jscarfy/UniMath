@@ -15,6 +15,7 @@ Vectors and matrices defined in March 2018 by Langston Barrett (@siddharthist).
 
 Require Export UniMath.Combinatorics.FiniteSets.
 Require Export UniMath.Combinatorics.Lists.
+Require Import UniMath.Combinatorics.Vectors.
 
 Require Import UniMath.MoreFoundations.PartA.
 Require Import UniMath.MoreFoundations.Tactics.
@@ -95,7 +96,7 @@ Proof.
   apply funextfun; intros [i b].
   simpl.
   induction (natlehchoice4 i n b) as [p|p].
-  - unfold funcomp; simpl.
+  - simpl.
     unfold append_vec. simpl.
     induction (natlehchoice4 i n b) as [q|q].
     + simpl. apply maponpaths. apply isinjstntonat; simpl. reflexivity.
@@ -103,7 +104,7 @@ Proof.
   - induction p.
     unfold append_vec; simpl.
     induction (natlehchoice4 i i b) as [r|r].
-    * simpl. unfold funcomp; simpl. apply maponpaths.
+    * simpl. apply maponpaths.
       apply isinjstntonat; simpl. reflexivity.
     * simpl. apply maponpaths. apply isinjstntonat; simpl. reflexivity.
 Defined.
@@ -121,7 +122,7 @@ Proof.
   intros.
   induction n as [|n IH].
   - refine (transportf (P 0) _ p0).
-    apply proofirrelevance, isapropifcontr, iscontr_vector_0.
+    apply proofirrelevancecontr, iscontr_vector_0.
   - exact (transportf (P _) (drop_and_append_vec vec)
                       (ind _ (vec ∘ dni_lastelement)
                              (vec lastelement)
@@ -136,7 +137,7 @@ Section Lemmas.
     (∏ i, f i = g (transportf stn p i))
     -> transportf (Vector X) p f = g.
   Proof.
-    intros ?.
+    intro.
     induction p.
     apply funextfun.
     assumption.
@@ -149,7 +150,7 @@ Section Lemmas.
   Definition vector_stn_proofirrelevance {vec : Vector X n}
             {i j : stn n} : (stntonat _ i = stntonat _ j) -> vec i = vec j.
   Proof.
-    intros ?.
+    intro.
     apply maponpaths, isinjstntonat; assumption.
   Defined.
 End Lemmas.
@@ -159,12 +160,12 @@ End Lemmas.
 Local Open Scope stn.
 
 (** An m × n matrix is an m-length vector of n-length vectors (rows).
-    <<
+<<
         <--- n --->
       | [ * * * * ]
       m [ * * * * ]
       | [ * * * * ]
-    >>
+>>
     Since [Vector]s are encoded as functions ⟦n⟧ → X, a matrix is a function (of
     two arguments). Thus, the (i, j)-entry of a matrix Mat is simply Mat i j.
  *)
@@ -259,7 +260,7 @@ Definition weqListSequence {X} : list X ≃ Sequence X.
 Proof.
   intros.
   apply weqfibtototal; intro n.
-  apply weqlistfun.
+  apply weqvecfun.
 Defined.
 
 Definition transport_stn m n i (b:i<m) (p:m=n) :
@@ -291,7 +292,7 @@ Proof.
     + apply transportf_fun.
     + apply funextfun. intro x. induction x as [ i b ].
       simple refine (_ @ e_el _ _ _).
-      * unfold funcomp.
+      * simpl.
         apply maponpaths.
         apply transport_stn.
 Defined.
@@ -336,13 +337,6 @@ Local Notation "s □ x" := (append s x) (at level 64, left associativity).
 Definition nil_unique {X} (x : stn 0 -> X) : nil = (0,,x).
 Proof.
   intros. unfold nil. apply maponpaths. apply isapropifcontr. apply iscontr_vector_0.
-Defined.
-
-Definition isaset_transportf {X : hSet} (P : X ->UU) {x : X} (e : x = x) (p : P x) :
-  transportf P e p = p.
-(* move upstream *)
-Proof. induction (pr1 ((setproperty _) _ _ (idpath _) e)).
-       reflexivity.
 Defined.
 
 (* induction principle for contractible types, as a warmup *)
@@ -429,7 +423,7 @@ Lemma append_and_drop_fun {X n} (x : stn n -> X) y :
 Proof.
   intros.
   apply funextsec; intros i.
-  unfold funcomp.
+  simpl.
   unfold append_vec.
   induction (natlehchoice4 (pr1 (dni lastelement i)) n (pr2 (dni lastelement i))) as [I|J].
   - simpl. apply maponpaths. apply subtypePath_prop. simpl. apply di_eq1. exact (stnlt i).
@@ -479,13 +473,13 @@ Proof.
     apply proofirrelevancecontr. apply iscontrunit. }
   induction p as [x y]. induction y as [n y].
   apply (maponpaths (@inr unit (X × Sequence X))).
-  unfold append_vec, lastelement, funcomp; simpl.
+  unfold append_vec, lastelement; simpl.
   unfold append_vec. simpl.
   induction (natlehchoice4 n n (natgthsnn n)) as [e|e].
   { contradicts e (isirreflnatlth n). }
   simpl. apply maponpaths, maponpaths.
   apply funextfun; intro i. clear e. induction i as [i b].
-  unfold funcomp, dni_lastelement; simpl.
+  unfold dni_lastelement; simpl.
   induction (natlehchoice4 i n (natlthtolths i n b)) as [d|d].
   { simpl. apply maponpaths. now apply isinjstntonat. }
   simpl. induction d; contradicts b (isirreflnatlth i).
@@ -559,7 +553,7 @@ Proof.
   - cbn. apply natplusnsm.
   - intros i r s.
     unfold concatenate, concatenate', weqfromcoprodofstn_invmap; cbn.
-    unfold append_vec, coprod_rect, funcomp; cbn.
+    unfold append_vec, coprod_rect; cbn.
     induction (natlthorgeh i m) as [H | H].
     + induction (natlehchoice4 i (m + n) s) as [H1 | H1].
       * reflexivity.

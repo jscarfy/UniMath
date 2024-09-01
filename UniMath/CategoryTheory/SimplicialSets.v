@@ -15,8 +15,8 @@ Require Export UniMath.Combinatorics.FiniteSets.
 Require Export UniMath.CategoryTheory.Core.Categories.
 Require Export UniMath.CategoryTheory.Core.Functors.
 Require Export UniMath.CategoryTheory.FunctorCategory.
-Require Export UniMath.CategoryTheory.categories.HSET.Core.
-Require Export UniMath.CategoryTheory.categories.HSET.Univalence.
+Require Export UniMath.CategoryTheory.Categories.HSET.Core.
+Require Export UniMath.CategoryTheory.Categories.HSET.Univalence.
 Require Export UniMath.CategoryTheory.opp_precat.
 
 (* To upstream files *)
@@ -77,7 +77,16 @@ Defined.
 
 Local Open Scope cat.
 
-Definition sSet := [ precatDelta^op , HSET, pr2 is_univalent_HSET ] .
+Definition has_homsets_precatDelta : has_homsets precatDelta.
+Proof.
+  intros a b.
+  cbn.
+  apply isasetmonfunstn.
+Qed.
+
+Definition catDelta : category := make_category precatDelta has_homsets_precatDelta.
+
+Definition sSet := functor_category catDelta^op category_HSET.
 (* V.V. with Sasha Vishik, Nov. 23, 2014 *)
 
 

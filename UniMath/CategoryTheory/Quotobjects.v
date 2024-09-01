@@ -11,23 +11,22 @@ Require Import UniMath.CategoryTheory.UnderCategories.
 Require Import UniMath.CategoryTheory.Epis.
 Require Import UniMath.CategoryTheory.Subcategory.Core.
 
-Require Import UniMath.CategoryTheory.limits.pushouts.
+Require Import UniMath.CategoryTheory.Limits.Pushouts.
 
 
 (** * Definition of quotient objects *)
 Section def_quotobjects.
 
-  Variable C : precategory.
-  Hypothesis hs : has_homsets C.
+  Variable C : category.
 
   Definition Quotobjectscategory (c : C) : UU :=
-    Undercategory (subprecategory_of_epis C hs)
-                     (has_homsets_subprecategory_of_epis C hs)
-                     (subprecategory_of_epis_ob C hs c).
+    Undercategory (subprecategory_of_epis C)
+                     (has_homsets_subprecategory_of_epis C)
+                     (subprecategory_of_epis_ob C c).
 
   (** Construction of a quotient object from an epi *)
   Definition Quotobjectscategory_ob {c c' : C} (h : C⟦c, c'⟧) (isE : isEpi h) :
-    Quotobjectscategory c := tpair _ (subprecategory_of_epis_ob C hs c') (tpair _ h isE).
+    Quotobjectscategory c := tpair _ (subprecategory_of_epis_ob C c') (tpair _ h isE).
 
   Hypothesis hpo : @Pushouts C.
 
@@ -39,7 +38,7 @@ Section def_quotobjects.
     set (po := hpo _ _ _ h (pr1 (pr2 Q))).
     use Quotobjectscategory_ob.
     - exact po.
-    - exact (limits.pushouts.PushoutIn1 po).
+    - exact (Limits.Pushouts.PushoutIn1 po).
     - use EpiPushoutisEpi'.
   Defined.
 

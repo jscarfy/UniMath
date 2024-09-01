@@ -158,7 +158,13 @@ Definition termfun {X : UU} (x : X) : unit -> X := λ _, x.
 
 Definition idfun (T : UU) := λ t:T, t.
 
+(** makes [simpl], [cbn], etc. unfold [idfun X x] but not [ idfun X ]: *)
+Arguments idfun _ _ /.
+
 Definition funcomp {X Y : UU} {Z:Y->UU} (f : X -> Y) (g : ∏ y:Y, Z y) := λ x, g (f x).
+
+(** make [simpl], [cbn], etc. unfold [ (f ∘ g) x ] but not [ f ∘ g ]: *)
+Arguments funcomp {_ _ _} _ _ _/.
 
 Declare Scope functions.
 Delimit Scope functions with functions.
@@ -232,7 +238,7 @@ Definition neg (X : UU) : UU := X -> empty.
 Notation "'¬' X" := (neg X).
 (* type this in emacs in agda-input method with \neg *)
 
-Notation "x != y" := (neg (x = y)).
+Notation "x != y" := (neg (x = y)) : type_scope.
 
 Definition negf {X Y : UU} (f : X -> Y) : ¬ Y -> ¬ X := λ phi x, phi (f x).
 
@@ -341,6 +347,7 @@ Proof.
   intros. induction e1. apply e2.
 Defined.
 
+#[global]
 Hint Resolve @pathscomp0 : pathshints.
 
 Ltac intermediate_path x := apply (pathscomp0 (b := x)).
@@ -366,6 +373,7 @@ Proof.
   intros. induction e. apply idpath.
 Defined.
 
+#[global]
 Hint Resolve @pathsinv0 : pathshints.
 
 Definition path_assoc {X} {a b c d:X}
@@ -1122,7 +1130,6 @@ in a coconus, namely the one that is given by the pair of t and the path that
 starts at t and ends at t, the coconuses are contractible. *)
 
 Lemma coconustot_isProofIrrelevant {T : UU} {t : T} (c1 c2 : coconustot T t) : c1 = c2.
-(* should rename this, since the property is not connectedness *)
 Proof.
   intros.
   induction c1 as [x0 x].
@@ -1225,7 +1232,7 @@ Defined.
 
 Definition weq (X Y : UU) : UU := ∑ f:X->Y, isweq f.
 
-Notation "X ≃ Y" := (weq X Y) : type_scope.
+Notation "X ≃ Y" := (weq X%type Y%type) : type_scope.
 (* written \~- or \simeq in Agda input method *)
 
 Definition pr1weq {X Y : UU} := pr1 : X ≃ Y -> (X -> Y).
@@ -1374,14 +1381,14 @@ Lemma homotweqinv  {X Y Z} (f:X->Z) (w:X≃Y) (g:Y->Z) : f ~ g ∘ w -> f ∘ in
 Proof.
   intros p y.
   simple refine (p (invmap w y) @ _); clear p.
-  unfold funcomp. apply maponpaths. apply homotweqinvweq.
+  simpl. apply maponpaths. apply homotweqinvweq.
 Defined.
 
 Lemma homotweqinv' {X Y Z} (f:X->Z) (w:X≃Y) (g:Y->Z) : f ~ g ∘ w <- f ∘ invmap w ~ g.
 Proof.
   intros q x.
   simple refine (_ @ q (w x)).
-  unfold funcomp. apply maponpaths, pathsinv0. apply homotinvweqweq.
+  simpl. apply maponpaths, pathsinv0. apply homotinvweqweq.
 Defined.
 
 Definition isinjinvmap {X Y} (v w:X≃Y) : invmap v ~ invmap w -> v ~ w.
@@ -1759,9 +1766,8 @@ Defined.
 
 (** This is kept to preserve compatibility with publications that use the
     name "gradth" for the "grad theorem". *)
-Definition gradth {X Y : UU} (f : X -> Y) (g : Y -> X)
-        (egf: ∏ x : X, g (f x) = x)
-        (efg: ∏ y : Y, f (g y) = y) : isweq f := isweq_iso f g egf efg.
+#[deprecated(note="Use isweq_iso instead.")]
+Notation gradth := isweq_iso (only parsing).
 
 Definition weq_iso {X Y : UU} (f : X -> Y) (g : Y -> X)
            (egf: ∏ x : X, g (f x) = x)

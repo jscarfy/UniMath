@@ -21,7 +21,7 @@ Require Import UniMath.CategoryTheory.Equivalences.Core.
 Require Import UniMath.CategoryTheory.FunctorCategory.
 Require Import UniMath.CategoryTheory.whiskering.
 Require Import UniMath.Bicategories.Core.Bicat. Import Bicat.Notations.
-Require Import UniMath.Bicategories.Core.Adjunctions.
+Require Import UniMath.Bicategories.Morphisms.Adjunctions.
 Require Import UniMath.Bicategories.Core.EquivToAdjequiv.
 Require Import UniMath.Bicategories.Core.AdjointUnique.
 Require Import UniMath.Bicategories.Core.Strictness.
@@ -50,7 +50,7 @@ Proof.
   - exact (λ _ _ _ _ _ _ _, nat_trans_id _).
 Defined.
 
-Definition strict_cat_prebicat_laws : prebicat_laws strict_cat_prebicat_data.
+Lemma strict_cat_prebicat_laws : prebicat_laws strict_cat_prebicat_data.
 Proof.
   repeat split; cbn.
   - intros C D F G η.
@@ -67,14 +67,14 @@ Proof.
     apply assoc.
   - intros C₁ C₂ C₃ F G.
     apply nat_trans_eq; try apply C₃.
-    reflexivity.
+    intros; apply idpath.
   - intros C₁ C₂ C₃ F G.
     apply nat_trans_eq; try apply C₃.
     intros ; cbn.
     apply functor_id.
   - intros C₁ C₂ C₃ F G₁ G₂ G₃ α β.
     apply nat_trans_eq; try apply C₃.
-    reflexivity.
+    intros; apply idpath.
   - intros C₁ C₂ C₃ F₁ F₂ F₃ G α β.
     apply nat_trans_eq; try apply C₃.
     intros ; cbn.
@@ -83,27 +83,27 @@ Proof.
     apply nat_trans_eq; try apply D.
     intros ; cbn.
     rewrite id_left, id_right.
-    reflexivity.
+    apply idpath.
   - intros C D F G α.
     apply nat_trans_eq; try apply D.
     intros ; cbn.
     rewrite id_left, id_right.
-    reflexivity.
+    apply idpath.
   - intros C₁ C₂ C₃ C₄ F G H₁ H₂ α.
     apply nat_trans_eq; try apply C₄.
     intros ; cbn.
     rewrite id_left, id_right.
-    reflexivity.
+    apply idpath.
   - intros C₁ C₂ C₃ C₄ F G₁ G₂ H α.
     apply nat_trans_eq; try apply C₄.
     intros ; cbn.
     rewrite id_left, id_right.
-    reflexivity.
+    apply idpath.
   - intros C₁ C₂ C₃ C₄ F₁ F₂ G H α.
     apply nat_trans_eq; try apply C₄.
     intros ; cbn.
     rewrite id_left, id_right.
-    reflexivity.
+    apply idpath.
   - intros C₁ C₂ C₃ F₁ F₂ G₁ H₂ α β.
     apply nat_trans_eq; try apply C₃.
     intros ; cbn.
@@ -155,7 +155,42 @@ Qed.
 Definition bicat_of_strict_cats : bicat
   := (prebicat_of_strict_cats,, isaset_cells_prebicat_of_strict_cats).
 
-Definition idtoiso_2_1_strict_cat_help
+Definition is_invertible_2cell_bicat_of_strict_cat
+           {C₁ C₂ : bicat_of_strict_cats}
+           {F G : C₁ --> C₂}
+           (α : F ==> G)
+           (Hα : is_nat_z_iso (pr1 α))
+  : is_invertible_2cell α.
+Proof.
+  use make_is_invertible_2cell.
+  - exact (pr1 (nat_z_iso_inv (make_nat_z_iso _ _ α Hα))).
+  - abstract
+      (use nat_trans_eq ; [ apply homset_property | ] ;
+       intro x ; cbn ;
+       exact (z_iso_inv_after_z_iso (make_z_iso _ _ (Hα x)))).
+  - abstract
+      (use nat_trans_eq ; [ apply homset_property | ] ;
+       intro x ; cbn ;
+       exact (z_iso_after_z_iso_inv (make_z_iso _ _ (Hα x)))).
+Defined.
+
+Definition from_is_invertible_2cell_bicat_of_strict_cat
+           {C₁ C₂ : bicat_of_strict_cats}
+           {F G : C₁ --> C₂}
+           (α : F ==> G)
+           (Hα : is_invertible_2cell α)
+  : is_nat_z_iso (pr1 α).
+Proof.
+  intros x.
+  use make_is_z_isomorphism.
+  - exact (pr1 (Hα^-1) x).
+  - abstract
+      (split ;
+       [ exact (nat_trans_eq_pointwise (vcomp_rinv Hα) x)
+       | exact (nat_trans_eq_pointwise (vcomp_linv Hα) x) ]).
+Defined.
+
+Lemma idtoiso_2_1_strict_cat_help
            {c d : bicat_of_strict_cats}
            {f : functor_data (pr1 c) (pr1 d)}
            {Hf Hf' : is_functor f}
@@ -174,7 +209,7 @@ Proof.
   apply idpath.
 Qed.
 
-Definition idtoiso_2_1_strict_cat
+Lemma idtoiso_2_1_strict_cat
            {c d : bicat_of_strict_cats}
            {f g : functor (pr1 c) (pr1 d)}
            (p : pr1 f = pr1 g)
@@ -199,7 +234,7 @@ Proof.
   apply idtoiso_2_1_strict_cat_help.
 Qed.
 
-Definition bicat_of_strict_cats_is_strict_bicat
+Lemma bicat_of_strict_cats_is_strict_bicat
   : is_strict_bicat bicat_of_strict_cats.
 Proof.
   use make_is_strict_bicat.
@@ -256,7 +291,7 @@ Proof.
       apply idpath.
 Qed.
 
-Definition two_cat_of_strict_cats
+Definition strict_bicat_of_strict_cats
   : strict_bicat.
 Proof.
   use tpair.

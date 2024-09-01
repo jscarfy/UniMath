@@ -13,6 +13,8 @@ Require Import UniMath.Foundations.Propositions.
 Require Import UniMath.Foundations.Sets.
 Require Import UniMath.Foundations.NaturalNumbers.
 
+Require Import UniMath.MoreFoundations.PartA.
+
 Require Import UniMath.Algebra.BinaryOperations.
 Require Import UniMath.Algebra.Monoids.
 
@@ -24,16 +26,16 @@ Require Import UniMath.CategoryTheory.Core.TransportMorphisms.
 Require Import UniMath.CategoryTheory.Core.Univalence.
 Local Open Scope cat.
 
-Require Import UniMath.CategoryTheory.limits.zero.
-Require Import UniMath.CategoryTheory.limits.binproducts.
-Require Import UniMath.CategoryTheory.limits.bincoproducts.
-Require Import UniMath.CategoryTheory.limits.equalizers.
-Require Import UniMath.CategoryTheory.limits.coequalizers.
-Require Import UniMath.CategoryTheory.limits.kernels.
-Require Import UniMath.CategoryTheory.limits.cokernels.
-Require Import UniMath.CategoryTheory.limits.pushouts.
-Require Import UniMath.CategoryTheory.limits.pullbacks.
-Require Import UniMath.CategoryTheory.limits.BinDirectSums.
+Require Import UniMath.CategoryTheory.Limits.Zero.
+Require Import UniMath.CategoryTheory.Limits.BinProducts.
+Require Import UniMath.CategoryTheory.Limits.BinCoproducts.
+Require Import UniMath.CategoryTheory.Limits.Equalizers.
+Require Import UniMath.CategoryTheory.Limits.Coequalizers.
+Require Import UniMath.CategoryTheory.Limits.Kernels.
+Require Import UniMath.CategoryTheory.Limits.Cokernels.
+Require Import UniMath.CategoryTheory.Limits.Pushouts.
+Require Import UniMath.CategoryTheory.Limits.Pullbacks.
+Require Import UniMath.CategoryTheory.Limits.BinDirectSums.
 Require Import UniMath.CategoryTheory.Monics.
 Require Import UniMath.CategoryTheory.Epis.
 Require Import UniMath.CategoryTheory.Core.Functors.
@@ -189,7 +191,7 @@ Section translation_functor.
     TranslationMorphism C1 C2 (ComplexHomotMorphism A H).
   Proof.
     unfold TranslationHomot. cbn. use MorphismEq. intros i. cbn.
-    induction (hzrminusplus i 1). cbn. rewrite pathscomp0rid. cbn. unfold idfun.
+    induction (hzrminusplus i 1). cbn. rewrite pathscomp0rid. cbn.
     rewrite <- PreAdditive_invrcomp. rewrite <- transport_target_to_inv.
     rewrite PreAdditive_invlcomp. rewrite inv_inv_eq.
     rewrite <- transport_target_to_inv.
@@ -222,9 +224,9 @@ Section translation_functor.
                      @ maponpaths (λ i0 : pr1 hz, i0 + 1) (hzrplusminus (i - 1 + 1) 1))).
       assert (ee : tmp = (hzrplusminus (i - 1 + 1 + 1) 1)) by apply isasethz.
       unfold tmp in ee. cbn in ee. unfold tmp. cbn. rewrite ee. clear ee. clear tmp.
-      induction (hzrplusminus (i - 1 + 1 + 1) 1). cbn. unfold idfun. apply idpath.
+      induction (hzrplusminus (i - 1 + 1 + 1) 1). cbn. apply idpath.
     }
-    cbn in e1. rewrite e1. clear e1. use to_lrw.
+    cbn in e1. rewrite e1. clear e1. use maponpaths_2.
     (* Show that the first elements of to_binop are the same *)
     set (tmp := @transport_hz_source_target A C2 1 (Diff C2) _ _ (hzrplusminus (i - 1 + 1) 1)).
     rewrite tmp. clear tmp. rewrite transport_compose.
@@ -240,17 +242,25 @@ Section translation_functor.
     subgrhrel (ComplexHomotSubgrp A _ _) (TranslationMorphism C1 C2 f)
               (TranslationMorphism C1 C2 g).
   Proof.
-    use (squash_to_prop H). apply propproperty. intros H'. clear H.
+    use (squash_to_prop H).
+    { apply propproperty. }
+    intros H'. clear H.
     induction H' as [H1 H2]. induction H1 as [H11 H12]. cbn in H11.
-    use (squash_to_prop H12). apply propproperty. intros H. cbn in H2.
+    use (squash_to_prop H12).
+    { apply propproperty. }
+    intros H. cbn in H2.
     induction H as [HH1 HH2].
     intros P X. apply X. clear X P.
     use tpair.
-    - use tpair. cbn. exact (TranslationMorphism _ _ H11).
-      intros P X. apply X. clear X P.
-      use tpair.
-      + exact (TranslationHomot HH1).
-      + cbn. rewrite TranslationFunctorHomotopies. rewrite HH2. apply idpath.
+    - use tpair.
+      + cbn.
+        exact (TranslationMorphism _ _ H11).
+      + intros P X.
+        apply X.
+        clear X P.
+        use tpair.
+        * exact (TranslationHomot HH1).
+        * cbn. rewrite TranslationFunctorHomotopies. rewrite HH2. apply idpath.
     - cbn. rewrite H2.
       set (tmp := @AdditiveFunctorLinear (ComplexPreCat_Additive A) (ComplexPreCat_Additive A)
                                          TranslationFunctor_Additive C1 C2 f (to_inv g)).
@@ -273,7 +283,7 @@ Section translation_functor.
     ZeroArrow (Additive.to_Zero A) _ _.
   Proof.
     induction (hzrminusplus (i + 1) 1 @ ! hzrplusminus (i + 1) 1).
-    induction (hzrminusplus i 1 @ ! hzrplusminus i 1). cbn. unfold idfun.
+    induction (hzrminusplus i 1 @ ! hzrplusminus i 1). cbn.
     rewrite <- PreAdditive_invlcomp. rewrite <- PreAdditive_invrcomp.
     rewrite inv_inv_eq. apply DSq.
   Qed.
@@ -320,7 +330,7 @@ Section translation_functor.
     - exact (maponpaths C2 (hzrplusminus i 1)).
     - rewrite transport_target_postcompose. rewrite transport_f_f. rewrite <- maponpathscomp0.
       rewrite <- path_assoc. rewrite pathsinv0l. rewrite pathscomp0rid.
-      induction (hzrminusplus i 1). cbn. unfold idfun.
+      induction (hzrminusplus i 1). cbn.
       rewrite transport_target_postcompose.
       set (tmp := transport_hz_double_section A C1 C2 (MMor f) _ _ (hzrplusminus (i - 1 + 1) 1)).
       cbn. cbn in tmp. rewrite tmp. clear tmp.
@@ -388,7 +398,7 @@ Section translation_functor.
     InvTranslationMorphism C1 C2 (ComplexHomotMorphism A H).
   Proof.
     unfold InvTranslationHomot. cbn. use MorphismEq. intros i. cbn.
-    induction (hzrplusminus i 1). cbn. unfold idfun. rewrite pathscomp0rid.
+    induction (hzrplusminus i 1). cbn. rewrite pathscomp0rid.
     rewrite <- transport_target_to_inv. rewrite <- PreAdditive_invrcomp.
     rewrite <- PreAdditive_invlcomp. rewrite inv_inv_eq.
     rewrite <- transport_target_to_inv. rewrite <- PreAdditive_invlcomp.
@@ -411,7 +421,7 @@ Section translation_functor.
       }
       rewrite e2. clear e2. apply maponpaths. apply isasethz.
     }
-    cbn in e1. rewrite e1. clear e1. use to_lrw.
+    cbn in e1. rewrite e1. clear e1. use maponpaths_2.
     rewrite <- transport_target_postcompose. rewrite transport_f_f.
     assert (e2 : maponpaths (λ i0 : pr1 hz, C2 (i0 - 1)) (hzrminusplus (i + 1 - 1) 1) =
                  maponpaths C2 (maponpaths (λ i0 : hz, i0 - 1) (hzrminusplus (i + 1 - 1) 1))).
@@ -428,17 +438,22 @@ Section translation_functor.
     subgrhrel (ComplexHomotSubgrp A _ _) (InvTranslationMorphism C1 C2 f)
               (InvTranslationMorphism C1 C2 g).
   Proof.
-    use (squash_to_prop H). apply propproperty. intros H'. clear H.
+    use (squash_to_prop H).
+    { apply propproperty. }
+    intros H'. clear H.
     induction H' as [H1 H2]. induction H1 as [H11 H12]. cbn in H11.
-    use (squash_to_prop H12). apply propproperty. intros H. cbn in H2.
+    use (squash_to_prop H12).
+    { apply propproperty. }
+    intros H. cbn in H2.
     induction H as [HH1 HH2].
     intros P X. apply X. clear X P.
     use tpair.
-    - use tpair. cbn. exact (InvTranslationMorphism _ _ H11).
-      intros P X. apply X. clear X P.
-      use tpair.
-      + exact (InvTranslationHomot HH1).
-      + cbn. rewrite InvTranslationFunctorHomotopies. rewrite HH2. apply idpath.
+    - use tpair.
+      + cbn. exact (InvTranslationMorphism _ _ H11).
+      + intros P X. apply X. clear X P.
+        use tpair.
+        * exact (InvTranslationHomot HH1).
+        * cbn. rewrite InvTranslationFunctorHomotopies. rewrite HH2. apply idpath.
     - cbn. rewrite H2.
       set (tmp := @AdditiveFunctorLinear (ComplexPreCat_Additive A) (ComplexPreCat_Additive A)
                                          InvTranslationFunctor_Additive C1 C2 f (to_inv g)).
@@ -521,7 +536,7 @@ Section translation_functor.
                                        (to_inv (to_inv (Diff C (i - 1 + 1)))))) = Diff C i.
   Proof.
     rewrite inv_inv_eq.
-    induction (hzrminusplus i 1). cbn. unfold idfun.
+    induction (hzrminusplus i 1). cbn.
     rewrite transport_f_f.
     assert (e : maponpaths (λ i0 : pr1 hz, (C : Complex _) (i0 + 1))
                            (! hzrplusminus (i - 1 + 1) 1) =
@@ -555,7 +570,7 @@ Section translation_functor.
   Proof.
     use MorphismEq. intros i. Local Opaque ComplexEq. cbn.
     rewrite ComplexEq_transport_target. rewrite ComplexEq_transport_source. cbn.
-    induction (hzrminusplus i 1). cbn. unfold idfun. apply idpath.
+    induction (hzrminusplus i 1). cbn. apply idpath.
   Qed.
 
   Lemma TranslationInvTranslation :
@@ -604,7 +619,7 @@ Section translation_functor.
   Proof.
     Local Opaque ComplexEq. use MorphismEq. intros i. cbn.
     rewrite ComplexEq_transport_target. rewrite ComplexEq_transport_source. cbn.
-    induction (hzrplusminus i 1). cbn. unfold idfun. apply idpath.
+    induction (hzrplusminus i 1). cbn. apply idpath.
   Qed.
 
   Lemma InvTranslationTranslation :
@@ -636,7 +651,7 @@ Section translation_functor.
     rewrite <- transport_target_postcompose.
     rewrite id_right.
     rewrite transport_target_postcompose.
-    induction (hzrminusplus i 1). cbn. unfold idfun. rewrite id_left.
+    induction (hzrminusplus i 1). cbn. rewrite id_left.
     use transportf_paths.
     assert (e : maponpaths (λ i0 : pr1 hz, (x : Complex A) (i0 + 1))
                            (! hzrplusminus (i - 1 + 1) 1) =
@@ -996,7 +1011,8 @@ Section translation_functor.
              (f : (ComplexHomot_Additive A)⟦C1, C2⟧) : iscontr (TranslationFunctorHIm f).
   Proof.
     use (squash_to_prop (ComplexHomotFunctor_issurj A f)).
-    apply isapropiscontr. intros H.
+    { apply isapropiscontr. }
+    intros H.
     use make_iscontr.
     - exact (TranslationFunctorH_Mor_data f H).
     - intros t. use TranslationFunctorHImEquality.
@@ -1038,9 +1054,11 @@ Section translation_functor.
       · (TranslationFunctorHImMor (iscontrpr1 (TranslationFunctorH_Mor g))) .
   Proof.
     use (squash_to_prop (ComplexHomotFunctor_issurj A f)).
-    use to_has_homsets. intros f'.
+    { use to_has_homsets. }
+    intros f'.
     use (squash_to_prop (ComplexHomotFunctor_issurj A g)).
-    use to_has_homsets. intros g'.
+    { use to_has_homsets. }
+    intros g'.
     rewrite (TranslationFunctorHImEq (iscontrpr1 (TranslationFunctorH_Mor f)) _ (hfiberpr2 _ _ f')).
     rewrite (TranslationFunctorHImEq (iscontrpr1 (TranslationFunctorH_Mor g)) _ (hfiberpr2 _ _ g')).
     set (tmp := functor_comp (ComplexHomotFunctor A)
@@ -1091,7 +1109,8 @@ Section translation_functor.
         use (squash_to_prop
                (ComplexHomotFunctor_issurj
                   A (# (ComplexHomotFunctor A) f))).
-        apply to_has_homsets. intros f'.
+        { apply to_has_homsets. }
+        intros f'.
         set (im := TranslationFunctorH_Mor_data (# (ComplexHomotFunctor A) f) f').
         rewrite <- (@TranslationFunctorHImEq C1 C2 _ im f (idpath _)).
         use TranslationFunctorHImEq.
@@ -1122,9 +1141,11 @@ Section translation_functor.
       use AdditiveFunctorZeroArrow.
     - intros C1 C2 f g.
       use (squash_to_prop (ComplexHomotFunctor_issurj A f)).
-      apply to_has_homsets. intros f'.
+      { apply to_has_homsets. }
+      intros f'.
       use (squash_to_prop (ComplexHomotFunctor_issurj A g)).
-      apply to_has_homsets. intros g'.
+      { apply to_has_homsets. }
+      intros g'.
       rewrite (TranslationFunctorH_Mor_Im f f').
       rewrite (TranslationFunctorH_Mor_Im g g').
       use (pathscomp0 _ (AdditiveFunctorLinear
@@ -1212,7 +1233,8 @@ Section translation_functor.
              (f : (ComplexHomot_Additive A)⟦C1, C2⟧) : iscontr (InvTranslationFunctorHIm f).
   Proof.
     use (squash_to_prop (ComplexHomotFunctor_issurj A f)).
-    apply isapropiscontr. intros H.
+    { apply isapropiscontr. }
+    intros H.
     use make_iscontr.
     - exact (InvTranslationFunctorH_Mor_data f H).
     - intros t. use InvTranslationFunctorHImEquality.
@@ -1255,9 +1277,11 @@ Section translation_functor.
       · (InvTranslationFunctorHImMor (iscontrpr1 (InvTranslationFunctorH_Mor g))) .
   Proof.
     use (squash_to_prop (ComplexHomotFunctor_issurj A f)).
-    use to_has_homsets. intros f'.
+    { use to_has_homsets. }
+    intros f'.
     use (squash_to_prop (ComplexHomotFunctor_issurj A g)).
-    use to_has_homsets. intros g'.
+    { use to_has_homsets. }
+    intros g'.
     rewrite (InvTranslationFunctorHImEq
                (iscontrpr1 (InvTranslationFunctorH_Mor f)) _ (hfiberpr2 _ _ f')).
     rewrite (InvTranslationFunctorHImEq
@@ -1308,7 +1332,8 @@ Section translation_functor.
                     # (ComplexHomotFunctor A) (# InvTranslationFunctor f)) by apply idpath.
         rewrite e2. clear e2.
         use (squash_to_prop (ComplexHomotFunctor_issurj A (# (ComplexHomotFunctor A) f))).
-        apply to_has_homsets. intros f'.
+        { apply to_has_homsets. }
+        intros f'.
         set (im := InvTranslationFunctorH_Mor_data (# (ComplexHomotFunctor A) f) f').
         rewrite <- (@InvTranslationFunctorHImEq C1 C2 _ im f (idpath _)).
         use InvTranslationFunctorHImEq.
@@ -1340,9 +1365,11 @@ Section translation_functor.
       use AdditiveFunctorZeroArrow.
     - intros C1 C2 f g.
       use (squash_to_prop (ComplexHomotFunctor_issurj A f)).
-      apply to_has_homsets. intros f'.
+      { apply to_has_homsets. }
+      intros f'.
       use (squash_to_prop (ComplexHomotFunctor_issurj A g)).
-      apply to_has_homsets. intros g'.
+      { apply to_has_homsets. }
+      intros g'.
       rewrite (InvTranslationFunctorH_Mor_Im f f').
       rewrite (InvTranslationFunctorH_Mor_Im g g').
       use (pathscomp0 _ (AdditiveFunctorLinear
@@ -1396,11 +1423,13 @@ Section translation_functor.
         * intros i. cbn. exact (TranslationInvTranslation_eq1 C i).
       + intros C1 C2 f. unfold double_transport.
         use (squash_to_prop (ComplexHomotFunctor_issurj A f)).
-        use to_has_homsets. intros f'. cbn.
+        { use to_has_homsets. }
+        intros f'. cbn.
         rewrite (TranslationFunctorH_Mor_unique _ f').
         use (squash_to_prop (ComplexHomotFunctor_issurj
                                A (TranslationFunctorHImMor (TranslationFunctorH_Mor_data f f')))).
-        use (@to_has_homsets (ComplexHomot_Additive A)). intros f''.
+        { use (@to_has_homsets (ComplexHomot_Additive A)). }
+        intros f''.
         rewrite (InvTranslationFunctorH_Mor_unique _ f'').
         rewrite <- (hfiberpr2 _ _ f').
         rewrite <- (TranslationInvTranslation_eq2 (hfiberpr1 # (ComplexHomotFunctor A) f f')).
@@ -1435,12 +1464,14 @@ Section translation_functor.
         * intros i. cbn. exact (InvTranslationTranslation_eq1 C i).
       + intros C1 C2 f. unfold double_transport.
         use (squash_to_prop (ComplexHomotFunctor_issurj A f)).
-        use to_has_homsets.  intros f'. cbn.
+        { use to_has_homsets.  }
+        intros f'. cbn.
         rewrite (InvTranslationFunctorH_Mor_unique _ f').
         use (squash_to_prop
                (ComplexHomotFunctor_issurj
                   A (InvTranslationFunctorHImMor (InvTranslationFunctorH_Mor_data f f')))).
-        use (@to_has_homsets (ComplexHomot_Additive A)). intros f''.
+        { use (@to_has_homsets (ComplexHomot_Additive A)). }
+        intros f''.
         rewrite (TranslationFunctorH_Mor_unique _ f'').
         rewrite <- (hfiberpr2 _ _ f').
         rewrite <- (InvTranslationTranslation_eq2 (hfiberpr1 # (ComplexHomotFunctor A) f f')).
@@ -1477,7 +1508,8 @@ Section translation_functor.
           ComplexHomotFunctor compose InvTranslationFunctorH TranslationFunctorH
           TranslationFunctor InvTranslationFunctor.
     use (squash_to_prop (ComplexHomotFunctor_issurj A f)).
-    use to_has_homsets. intros f'.
+    { use to_has_homsets. }
+    intros f'.
     cbn. set (tmp := TranslationFunctorH_Mor_Im f f'). cbn in tmp. rewrite tmp. clear tmp.
     set (f'' := @make_hfiber
                   _ _ (# (ComplexHomotFunctor A))
@@ -1528,7 +1560,8 @@ Section translation_functor.
           ComplexHomotFunctor compose InvTranslationFunctorH TranslationFunctorH
           TranslationFunctor InvTranslationFunctor.
     use (squash_to_prop (ComplexHomotFunctor_issurj A f)).
-    use to_has_homsets. intros f'.
+    { use to_has_homsets. }
+    intros f'.
     cbn. set (tmp := InvTranslationFunctorH_Mor_Im f f'). cbn in tmp. rewrite tmp. clear tmp.
     set (f'' := @make_hfiber
                   _ _ (# (ComplexHomotFunctor A))

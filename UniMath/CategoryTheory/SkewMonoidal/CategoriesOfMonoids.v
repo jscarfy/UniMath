@@ -14,13 +14,13 @@ Local Open Scope cat.
 
 Section Precategory_of_SkewMonoids.
 
-Context (V : skewmonoidal_precategory).
+Context (V : skewmonoidal_category).
 
 Notation tensor := (skewmonoidal_tensor V).
 Notation I := (skewmonoidal_I V).
-Notation "C ⊠ D" := (precategory_binproduct C D) (at level 38).
-Notation "( c , d )" := (make_precatbinprod c d).
-Notation "( f #, g )" := (precatbinprodmor f g).
+Notation "C ⊠ D" := (category_binproduct C D) (at level 38).
+Notation "( c , d )" := (make_catbinprod c d).
+Notation "( f #, g )" := (catbinprodmor f g).
 Notation "X ⊗ Y" := (tensor (X , Y)).
 
 Notation "f #⊗ g" :=
@@ -34,7 +34,7 @@ Notation ρ' := (skewmonoidal_unitr (data_from_skewmonoidal V)).
 Definition skewMonoid_data : UU :=
   ∑ X : V, (X ⊗ X --> X) × (I --> X).
 
-Coercion sm_ob (X : skewMonoid_data) : V := pr1 X.
+#[reversible=no] Coercion sm_ob (X : skewMonoid_data) : V := pr1 X.
 
 Definition sm_unit (X : skewMonoid_data) : I --> X := pr2 (pr2 X).
 Definition sm_mult (X : skewMonoid_data) : X ⊗ X --> X := pr1 (pr2 X).
@@ -48,7 +48,7 @@ Definition skewMonoid_laws (X : skewMonoid_data) : UU :=
 
 Definition skewMonoid : UU := ∑ (X : skewMonoid_data), skewMonoid_laws X.
 
-Coercion skewMonoid_to_data (X : skewMonoid) : skewMonoid_data := pr1 X.
+#[reversible=no] Coercion skewMonoid_to_data (X : skewMonoid) : skewMonoid_data := pr1 X.
 
 Definition skewMonoid_pentagon (X : skewMonoid) :
   μ X #⊗ identity X · μ X =  α' X X X · identity X #⊗ μ X · μ X
@@ -66,17 +66,17 @@ Definition skewMonoid_Mor_laws  {T T' : skewMonoid_data} (α : V ⟦T , T'⟧)
    (μ T · α  = α #⊗ α · μ T')
                 × η T · α = η T'.
 
-Lemma isaprop_skewMonoid_Mor_laws  (hs : has_homsets V)
+Lemma isaprop_skewMonoid_Mor_laws
   (T T' : skewMonoid_data ) (α : V ⟦ T , T' ⟧)
   : isaprop (skewMonoid_Mor_laws α).
 Proof.
-  apply isapropdirprod; apply hs.
+  apply isapropdirprod; apply homset_property.
 Qed.
 
 Definition skewMonoid_Mor  (T T' : skewMonoid_data) : UU
   := ∑ α , @skewMonoid_Mor_laws T T' α.
 
-Coercion mor_from_monoid_mor (T T' : skewMonoid_data) (s : skewMonoid_Mor T T')
+#[reversible=no] Coercion mor_from_monoid_mor (T T' : skewMonoid_data) (s : skewMonoid_Mor T T')
   : V ⟦ T , T' ⟧ := pr1 s.
 
 Definition skewMonoid_Mor_η  {T T' : skewMonoid_data } (α : skewMonoid_Mor T T')
@@ -123,12 +123,12 @@ Definition skewMonoid_composition  {T T' T'' : skewMonoid_data }
   (α : skewMonoid_Mor T T') (α' : skewMonoid_Mor T' T'')
   : skewMonoid_Mor T T'' := tpair _ _ (skewMonoid_composition_laws α α').
 
-Definition skewMonoid_Mor_equiv (hs : has_homsets V)
+Definition skewMonoid_Mor_equiv
   {T T' : skewMonoid_data } (α β : skewMonoid_Mor T T')
   : α = β ≃ (pr1 α = pr1 β).
 Proof.
   apply subtypeInjectivity; intro a.
-  apply isaprop_skewMonoid_Mor_laws, hs.
+  apply isaprop_skewMonoid_Mor_laws.
 Defined.
 
 Definition precategory_skewMonoid_ob_mor  : precategory_ob_mor
@@ -141,21 +141,21 @@ Proof.
   exact (fun (A B C : skewMonoid) => @skewMonoid_composition A B C ).
 Defined.
 
-Lemma precategory_skewMonoid_axioms  (hs : has_homsets V)
+Lemma precategory_skewMonoid_axioms
   : is_precategory precategory_skewMonoid_data.
 Proof.
   repeat split; simpl; intros.
-  - apply (invmap (skewMonoid_Mor_equiv hs _ _ )).
+  - apply (invmap (skewMonoid_Mor_equiv _ _ )).
     apply id_left.
-  - apply (invmap (skewMonoid_Mor_equiv hs _ _ )).
+  - apply (invmap (skewMonoid_Mor_equiv _ _ )).
     apply id_right.
-  - apply (invmap (skewMonoid_Mor_equiv hs _ _ )).
+  - apply (invmap (skewMonoid_Mor_equiv _ _ )).
     apply assoc.
-  - apply (invmap (skewMonoid_Mor_equiv hs _ _ )).
+  - apply (invmap (skewMonoid_Mor_equiv _ _ )).
     apply assoc'.
 Qed.
 
-Definition precategory_skewMonoid  (hs : has_homsets V) : precategory
-  := tpair _ _ (precategory_skewMonoid_axioms hs).
+Definition precategory_skewMonoid : precategory
+  := tpair _ _ precategory_skewMonoid_axioms.
 
 End Precategory_of_SkewMonoids.

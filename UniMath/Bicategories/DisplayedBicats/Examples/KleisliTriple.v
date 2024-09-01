@@ -14,13 +14,12 @@ Require Import UniMath.CategoryTheory.Core.NaturalTransformations.
 Require Import UniMath.CategoryTheory.whiskering.
 Require Import UniMath.CategoryTheory.opp_precat.
 Require Import UniMath.CategoryTheory.DisplayedCats.Core.
-Require Import UniMath.Bicategories.Core.Examples.BicatOfCats.
+Require Import UniMath.Bicategories.Core.Examples.BicatOfUnivCats.
 Require Import UniMath.Bicategories.Core.Bicat. Import Bicat.Notations.
-Require Import UniMath.Bicategories.Core.Adjunctions.
+Require Import UniMath.Bicategories.Morphisms.Adjunctions.
 Require Import UniMath.Bicategories.Core.AdjointUnique.
 Require Import UniMath.Bicategories.Core.Invertible_2cells.
 Require Import UniMath.Bicategories.Core.Univalence.
-Require Import UniMath.Bicategories.DisplayedBicats.DispBicat.
 Require Import UniMath.Bicategories.DisplayedBicats.DispBicat.
 Require Import UniMath.Bicategories.DisplayedBicats.DispAdjunctions.
 Require Import UniMath.Bicategories.DisplayedBicats.DispInvertibles.
@@ -122,25 +121,25 @@ Definition kleisli_triple_on_functor
            (MD : kleisli_triple D)
            (F : C ⟶ D)
   : UU
-  := ∑ (MF : ∏ (X : C), iso (MD (F X)) (F (MC X))),
+  := ∑ (MF : ∏ (X : C), z_iso (MD (F X)) (F (MC X))),
      (∏ (A : C), #F (unit_kt MC A) = unit_kt MD (F A) · MF A)
      ×
      (∏ (A B : C) (f : A --> MC B),
       #F (bind_kt MC f) =
-      inv_from_iso (MF A) · bind_kt MD (#F f · inv_from_iso (MF B)) · MF B).
+      inv_from_z_iso (MF A) · bind_kt MD (#F f · inv_from_z_iso (MF B)) · MF B).
 
 Definition make_kleisli_triple_on_functor
            {C D : category}
            {MC : kleisli_triple C}
            {MD : kleisli_triple D}
            {F : C ⟶ D}
-           (MF : ∏ (X : C), iso (MD (F X)) (F (MC X)))
+           (MF : ∏ (X : C), z_iso (MD (F X)) (F (MC X)))
            (MFunit : ∏ (A : C),
                      #F (unit_kt MC A) = unit_kt MD (F A) · MF A)
            (MFbind : ∏ (A B : C) (f : A --> MC B),
                      #F (bind_kt MC f)
                      =
-                     inv_from_iso (MF A) · bind_kt MD (#F f · inv_from_iso (MF B)) · MF B)
+                     inv_from_z_iso (MF A) · bind_kt MD (#F f · inv_from_z_iso (MF B)) · MF B)
   : kleisli_triple_on_functor MC MD F
   := (MF,, MFunit,, MFbind).
 
@@ -152,24 +151,24 @@ Context {C D : category}
         {F : C ⟶ D}
         (MF : kleisli_triple_on_functor MC MD F).
 
-Definition kleisli_triple_on_functor_iso
-  : ∏ (X : C), iso (MD (F X)) (F (MC X))
+Definition kleisli_triple_on_functor_z_iso
+  : ∏ (X : C), z_iso (MD (F X)) (F (MC X))
   := pr1 MF.
 
 Definition kleisli_triple_on_functor_unit_kt
   : ∏ (A : C),
     #F (unit_kt MC A)
     =
-    unit_kt MD (F A) · kleisli_triple_on_functor_iso A
+    unit_kt MD (F A) · kleisli_triple_on_functor_z_iso A
   := pr12 MF.
 
 Definition kleisli_triple_on_functor_bind_kt
   : ∏ (A B : C) (f : A --> MC B),
     #F (bind_kt MC f)
     =
-    inv_from_iso (kleisli_triple_on_functor_iso A)
-                 · bind_kt MD (#F f · inv_from_iso (kleisli_triple_on_functor_iso B))
-                 · kleisli_triple_on_functor_iso B
+    inv_from_z_iso (kleisli_triple_on_functor_z_iso A)
+                 · bind_kt MD (#F f · inv_from_z_iso (kleisli_triple_on_functor_z_iso B))
+                 · kleisli_triple_on_functor_z_iso B
   := pr22 MF.
 
 End Projections.
@@ -180,7 +179,7 @@ Definition kleisli_triple_on_identity_functor
   : kleisli_triple_on_functor MC MC (functor_identity C).
 Proof.
   use tpair.
-  - exact (λ X, identity_iso _).
+  - exact (λ X, identity_z_iso _).
   - split ; cbn.
     + abstract
         (intro ;
@@ -192,28 +191,28 @@ Proof.
          apply idpath).
 Defined.
 
-Definition inv_from_iso_iso_comp
+Definition inv_from_z_iso_z_iso_comp
            {C : category}
            {x y z : C}
-           (f : iso x y) (g : iso y z)
-  : inv_from_iso (iso_comp f g) = inv_from_iso g · inv_from_iso f.
+           (f : z_iso x y) (g : z_iso y z)
+  : inv_from_z_iso (z_iso_comp f g) = inv_from_z_iso g · inv_from_z_iso f.
 Proof.
   refine (!_).
-  apply inv_iso_unique'.
+  apply inv_z_iso_unique'.
   unfold precomp_with ; cbn.
   etrans.
   {
     rewrite <- !assoc.
     apply maponpaths.
     rewrite assoc.
-    rewrite iso_inv_after_iso.
+    rewrite z_iso_inv_after_z_iso.
     apply id_left.
   }
-  apply iso_inv_after_iso.
+  apply z_iso_inv_after_z_iso.
 Qed.
 
 Definition kleisli_triple_disp_cat_data
-  : disp_cat_data bicat_of_cats.
+  : disp_cat_data bicat_of_univ_cats.
 Proof.
   use tpair.
   - use tpair ; cbn.
@@ -223,7 +222,7 @@ Proof.
     + exact @kleisli_triple_on_identity_functor.
     + intros C₁ C₂ C₃ F₁ F₂ M₁ M₂ M₃ MF₁ MF₂.
       use tpair.
-      * exact (λ X, iso_comp (pr1 MF₂ (F₁ X)) (functor_on_iso F₂ (pr1 MF₁ X))).
+      * exact (λ X, z_iso_comp (pr1 MF₂ (F₁ X)) (functor_on_z_iso F₂ (pr1 MF₁ X))).
       * split.
         ** abstract
              (intros A ; cbn;
@@ -238,9 +237,9 @@ Proof.
               rewrite !functor_comp;
               rewrite (pr22 MF₂);
               rewrite !functor_comp;
-              rewrite (inv_from_iso_iso_comp (pr1 MF₂ (F₁ A)));
-              rewrite (inv_from_iso_iso_comp (pr1 MF₂ (F₁ B)));
-              rewrite <- !functor_on_inv_from_iso;
+              rewrite (inv_from_z_iso_z_iso_comp (pr1 MF₂ (F₁ A)));
+              rewrite (inv_from_z_iso_z_iso_comp (pr1 MF₂ (F₁ B)));
+              rewrite <- !functor_on_inv_from_z_iso;
               rewrite !assoc;
               apply idpath).
 Defined.
@@ -260,7 +259,7 @@ Definition kleisli_triple_nat_trans
      #(functor_data_of_kleisli_triple MC₂) (n X) · pr1 MF₂ X.
 
 Definition kleisli_triple_disp_prebicat_1_id_comp_cells
-  : disp_prebicat_1_id_comp_cells bicat_of_cats.
+  : disp_prebicat_1_id_comp_cells bicat_of_univ_cats.
 Proof.
   use tpair.
   - exact kleisli_triple_disp_cat_data.
@@ -340,16 +339,16 @@ Proof.
     unfold functor_data_of_kleisli_triple ; cbn.
     rewrite (pr22 MG) ; cbn.
     rewrite !assoc.
-    rewrite iso_inv_after_iso, id_left.
+    rewrite z_iso_inv_after_z_iso, id_left.
     apply maponpaths_2.
     rewrite functor_comp.
     rewrite (pr12 MG) ; cbn.
     rewrite <- !assoc.
-    rewrite iso_inv_after_iso, id_right.
+    rewrite z_iso_inv_after_z_iso, id_right.
     apply idpath.
 Qed.
 
-Definition kleisli_triple_disp_prebicat_data: disp_prebicat_data bicat_of_cats.
+Definition kleisli_triple_disp_prebicat_data: disp_prebicat_data bicat_of_univ_cats.
 Proof.
   use tpair.
   - exact kleisli_triple_disp_prebicat_1_id_comp_cells.
@@ -357,7 +356,7 @@ Proof.
 Defined.
 
 Definition disp_2cellsisaprop
-           {a b : bicat_of_cats}
+           {a b : bicat_of_univ_cats}
            {f g : a --> b}
            (η : f ==> g)
            {aa : kleisli_triple_disp_prebicat_data a}
@@ -368,7 +367,7 @@ Definition disp_2cellsisaprop
 Proof.
   use impred.
   intro.
-  apply (pr22 b).
+  apply homset_property.
 Qed.
 
 Definition kleisli_triple_disp_laws
@@ -377,14 +376,14 @@ Proof.
   repeat split ; intro ; intros ; apply disp_2cellsisaprop.
 Qed.
 
-Definition kleisli_triple_disp_prebicat : disp_prebicat bicat_of_cats.
+Definition kleisli_triple_disp_prebicat : disp_prebicat bicat_of_univ_cats.
 Proof.
   use tpair.
   - exact kleisli_triple_disp_prebicat_data.
   - exact kleisli_triple_disp_laws.
 Defined.
 
-Definition kleisli_triple_disp_bicat : disp_bicat bicat_of_cats.
+Definition kleisli_triple_disp_bicat : disp_bicat bicat_of_univ_cats.
 Proof.
   use tpair.
   - exact kleisli_triple_disp_prebicat.
@@ -405,7 +404,7 @@ Qed.
 
 Definition disp_locally_groupoid_kleisli_help
            (a b : univalent_category)
-           (f g : bicat_of_cats ⟦ a , b ⟧)
+           (f g : bicat_of_univ_cats ⟦ a , b ⟧)
            (x : invertible_2cell f g)
            (aa : kleisli_triple a)
            (bb : kleisli_triple b)
@@ -417,9 +416,8 @@ Definition disp_locally_groupoid_kleisli_help
     =
     (bind_kt bb (pr1 (x ^-1) X · unit_kt bb (pr1 f X)))
       · pr1 ff X
-      · (pr11 x (pr1 aa X) · id₁ _).
+      · (pr11 x (pr1 aa X)).
 Proof.
-  rewrite id_right.
   rewrite assoc'.
   rewrite xx.
   rewrite assoc.
@@ -437,11 +435,9 @@ Proof.
     apply maponpaths_2.
     apply maponpaths.
     apply maponpaths_2.
-    pose (pr2 (invertible_2cell_to_nat_iso _ _ (inv_of_invertible_2cell x)) X) as q'.
-    pose (iso_inv_after_iso (_ ,, q')) as p.
+    pose (pr2 (invertible_2cell_to_nat_z_iso _ _ (inv_of_invertible_2cell x)) X) as q'.
+    pose (z_iso_inv_after_z_iso (_ ,, q')) as p.
     cbn in p.
-    unfold precomp_with in p.
-    rewrite id_right in p.
     apply p.
   }
   rewrite id_left.
@@ -455,10 +451,10 @@ Definition disp_locally_groupoid_kleisli
 Proof.
   use make_disp_locally_groupoid.
   - intros a b f g x aa bb ff gg xx X.
-    pose (pr2 (invertible_2cell_to_nat_iso
+    pose (pr2 (invertible_2cell_to_nat_z_iso
                  _ _
                  (inv_of_invertible_2cell x)) (pr1 aa X)) as q.
-    apply (iso_inv_to_right _ _ _ _ _ (_ ,, q)).
+    apply (z_iso_inv_to_right _ _ _ _ (_ ,, q)).
     apply disp_locally_groupoid_kleisli_help.
     exact xx.
   - exact disp_2cells_isaprop_kleisli.

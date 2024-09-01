@@ -5,10 +5,30 @@
 Require Import UniMath.Foundations.All.
 Require Import UniMath.MoreFoundations.All.
 Require Import UniMath.CategoryTheory.Core.Categories.
+Require Import UniMath.CategoryTheory.Core.Isos.
 Require Import UniMath.CategoryTheory.Core.Functors.
-Require Import UniMath.Bicategories.Core.Bicat. Import Notations.
+Require Import UniMath.Bicategories.Core.Bicat. Import Bicat.Notations.
 
 Local Open Scope cat.
+
+Definition eq_is_invertible_2cell
+           {B : bicat}
+           {a b : B}
+           {f g : a --> b}
+           {α β : f ==> g}
+           (p : α = β)
+           (Hα : is_invertible_2cell α)
+  : is_invertible_2cell β.
+Proof.
+  use make_is_invertible_2cell.
+  - exact (Hα^-1).
+  - abstract
+      (rewrite <- p ;
+       apply vcomp_rinv).
+  - abstract
+      (rewrite <- p ;
+       apply vcomp_linv).
+Defined.
 
 (* ----------------------------------------------------------------------------------- *)
 (** ** Inverse 2cell of a composition                                                  *)
@@ -74,7 +94,7 @@ Defined.
 
 (** ** Two-cells that are isomorphisms **)
 
-Definition pentagon
+Lemma pentagon
            {C : bicat}
            {V W X Y Z : C}
            (k : C⟦Y,Z⟧) (h : C⟦X,Y⟧) (g : C⟦W,X⟧) (f : C⟦V,W⟧)
@@ -120,7 +140,7 @@ Definition bc_whisker_l
 
 (* Notation "g '◅' α" := (bc_whisker_l g α) (at level 40) : bicategory_scope. *)
 
-Definition bc_whisker_l_id₂
+Lemma bc_whisker_l_id₂
            {C : bicat}
            {X Y Z : C}
            (f : C⟦X,Y⟧)
@@ -141,7 +161,7 @@ Definition bc_whisker_r
 
 (* Notation "β '▻' f" := (bc_whisker_r β f) (at level 40) : bicategory_scope. *)
 
-Definition bc_whisker_r_id₂
+Lemma bc_whisker_r_id₂
            {C : bicat}
            {X Y Z : C}
            (f : C⟦X,Y⟧)
@@ -151,7 +171,7 @@ Proof.
   apply lwhisker_id2.
 Qed.
 
-Definition inverse_of_assoc
+Lemma inverse_of_assoc
            {C : bicat}
            {W X Y Z : C}
            (h : C⟦Y,Z⟧) (g : C⟦X,Y⟧) (f : C⟦W,X⟧)
@@ -162,7 +182,7 @@ Qed.
 
 (**** Properties of isomorphisms ***)
 
-Definition vcomp_move_L_Vp
+Lemma vcomp_move_L_Vp
            {C : bicat}
            {X Y : C}
            {f g h : C⟦X,Y⟧}
@@ -170,7 +190,7 @@ Definition vcomp_move_L_Vp
            (Hε : is_invertible_2cell ε)
   : ε o η₁ = η₂ -> η₁ = Hε^-1 o η₂.
 Proof.
-  intros ?.
+  intro.
   rewrite <- (id2_right η₁).
   rewrite <- (vcomp_rinv Hε).
   rewrite vassocr.
@@ -178,7 +198,7 @@ Proof.
   assumption.
 Qed.
 
-Definition vcomp_move_L_pV
+Lemma vcomp_move_L_pV
            {C : bicat}
            {X Y : C}
            {f g h : C⟦X,Y⟧}
@@ -190,11 +210,11 @@ Proof.
   rewrite <- (id2_left η₁).
   rewrite <- (vcomp_linv Hε).
   rewrite <- vassocr.
-  rewrite Hη.
-  reflexivity.
+  apply maponpaths.
+  exact Hη.
 Qed.
 
-Definition vcomp_move_R_Mp
+Lemma vcomp_move_R_Mp
            {C : bicat}
            {X Y : C}
            {f g h : C⟦X,Y⟧}
@@ -202,7 +222,7 @@ Definition vcomp_move_R_Mp
            (Hε : is_invertible_2cell ε)
   : η₁ = Hε^-1 o η₂ -> ε o η₁ = η₂.
 Proof.
-  intros ?.
+  intro.
   rewrite <- (id2_right η₂).
   rewrite <- (vcomp_linv Hε).
   rewrite vassocr.
@@ -210,7 +230,7 @@ Proof.
   assumption.
 Qed.
 
-Definition vcomp_move_R_pM
+Lemma vcomp_move_R_pM
            {C : bicat}
            {X Y : C}
            {f g h : C⟦X,Y⟧}
@@ -222,11 +242,11 @@ Proof.
   rewrite <- (id2_left η₂).
   rewrite <- (vcomp_rinv Hε).
   rewrite <- vassocr.
-  rewrite Hη.
-  reflexivity.
+  apply maponpaths.
+  apply Hη.
 Qed.
 
-Definition vcomp_move_L_Mp
+Lemma vcomp_move_L_Mp
            {C : bicat}
            {X Y : C}
            {f g h : C⟦X,Y⟧}
@@ -234,7 +254,7 @@ Definition vcomp_move_L_Mp
            (Hε : is_invertible_2cell ε)
   : Hε^-1 o η₁ = η₂ -> η₁ = ε o η₂.
 Proof.
-  intros ?.
+  intros.
   rewrite <- (id2_right η₁).
   rewrite <- (vcomp_linv Hε).
   rewrite vassocr.
@@ -242,7 +262,7 @@ Proof.
   assumption.
 Qed.
 
-Definition vcomp_move_L_pM
+Lemma vcomp_move_L_pM
            {C : bicat}
            {X Y : C}
            {f g h : C⟦X,Y⟧}
@@ -254,11 +274,11 @@ Proof.
   rewrite <- (id2_left η₁).
   rewrite <- (vcomp_rinv Hε).
   rewrite <- vassocr.
-  rewrite Hη.
-  reflexivity.
+  apply maponpaths.
+  apply Hη.
 Qed.
 
-Definition path_inverse_2cell
+Lemma path_inverse_2cell
            {C : bicat}
            {X Y : C}
            {f g : C⟦X,Y⟧}
@@ -275,9 +295,9 @@ Proof.
   apply maponpaths.
   rewrite <- p.
   apply vcomp_rinv.
-Defined.
+Qed.
 
-Definition isaset_invertible_2cell
+Lemma isaset_invertible_2cell
            {C : bicat}
            {X Y : C}
            (f g : X --> Y)
@@ -288,7 +308,7 @@ Proof.
   - intro.
     apply isasetaprop.
     apply isaprop_is_invertible_2cell.
-Defined.
+Qed.
 
 Ltac is_iso :=
   match goal with
@@ -333,3 +353,182 @@ Proof.
     + apply α.
     + apply β.
 Defined.
+
+Definition lwhisker_of_invertible_2cell
+           {B : bicat}
+           {x y z : B}
+           (f : x --> y)
+           {g₁ g₂ : y --> z}
+           (α : invertible_2cell g₁ g₂)
+  : invertible_2cell (f · g₁) (f · g₂).
+Proof.
+  use make_invertible_2cell.
+  - exact (f ◃ α).
+  - is_iso.
+    apply α.
+Defined.
+
+Definition rwhisker_of_invertible_2cell
+           {B : bicat}
+           {x y z : B}
+           {f₁ f₂ : x --> y}
+           (g : y --> z)
+           (α : invertible_2cell f₁ f₂)
+  : invertible_2cell (f₁ · g) (f₂ · g).
+Proof.
+  use make_invertible_2cell.
+  - exact (α ▹ g).
+  - is_iso.
+    apply α.
+Defined.
+
+Definition lunitor_invertible_2cell
+           {B : bicat}
+           {a b : B}
+           (f : a --> b)
+  : invertible_2cell (id₁ a · f) f.
+Proof.
+  use make_invertible_2cell.
+  - exact (lunitor f).
+  - is_iso.
+Defined.
+
+Definition linvunitor_invertible_2cell
+           {B : bicat}
+           {a b : B}
+           (f : a --> b)
+  : invertible_2cell f (id₁ a · f).
+Proof.
+  use make_invertible_2cell.
+  - exact (linvunitor f).
+  - is_iso.
+Defined.
+
+Definition runitor_invertible_2cell
+           {B : bicat}
+           {a b : B}
+           (f : a --> b)
+  : invertible_2cell (f · id₁ b) f.
+Proof.
+  use make_invertible_2cell.
+  - exact (runitor f).
+  - is_iso.
+Defined.
+
+Definition rinvunitor_invertible_2cell
+           {B : bicat}
+           {a b : B}
+           (f : a --> b)
+  : invertible_2cell f (f · id₁ b).
+Proof.
+  use make_invertible_2cell.
+  - exact (rinvunitor f).
+  - is_iso.
+Defined.
+
+Definition lassociator_invertible_2cell
+           {B : bicat}
+           {a b c d : B}
+           (f : a --> b)
+           (g : b --> c)
+           (h : c --> d)
+  : invertible_2cell (f · (g · h)) (f · g · h).
+Proof.
+  use make_invertible_2cell.
+  - exact (lassociator f g h).
+  - is_iso.
+Defined.
+
+Definition rassociator_invertible_2cell
+           {B : bicat}
+           {a b c d : B}
+           (f : a --> b)
+           (g : b --> c)
+           (h : c --> d)
+  : invertible_2cell (f · g · h) (f · (g · h)).
+Proof.
+  use make_invertible_2cell.
+  - exact (rassociator f g h).
+  - is_iso.
+Defined.
+
+(**
+ Invertible 2-cells are the same as isos in the hom category
+ *)
+Section InvertibleIsIso.
+  Context {B : bicat}.
+
+  Definition is_inv2cell_to_is_z_iso
+             {a b : B}
+             {f g : hom a b}
+             (α : f ==> g)
+             (Hα : is_invertible_2cell α)
+    : is_z_isomorphism α.
+  Proof.
+    exists (Hα^-1).
+    abstract (split ; [ apply vcomp_rinv | apply vcomp_linv]).
+  Defined.
+
+  Definition inv2cell_to_z_iso
+             {a b : B}
+             {f g : hom a b}
+             (α : invertible_2cell f g)
+    : z_iso f g.
+  Proof.
+    use make_z_iso'.
+    - apply α.
+    - apply is_inv2cell_to_is_z_iso.
+      apply property_from_invertible_2cell.
+  Defined.
+
+  Definition is_z_iso_to_is_inv2cell
+             {a b : B}
+             {f g : hom a b}
+             (α : f ==> g)
+             (Hα : is_z_isomorphism α)
+    : is_invertible_2cell α.
+  Proof.
+    use make_is_invertible_2cell.
+    - exact (inv_from_z_iso (α ,, Hα)).
+    - exact (z_iso_inv_after_z_iso (α ,, Hα)).
+    - exact (z_iso_after_z_iso_inv (α ,, Hα)).
+  Defined.
+
+  Definition z_iso_to_inv2cell
+             {a b : B}
+             {f g : hom a b}
+             (α : z_iso f g)
+    : invertible_2cell f g.
+  Proof.
+    use make_invertible_2cell.
+    - exact (pr1 α).
+    - exact (is_z_iso_to_is_inv2cell _ (pr2 α)).
+  Defined.
+
+  Definition inv2cell_to_z_iso_isweq
+             {a b : B}
+             (f g : hom a b)
+    : isweq (@inv2cell_to_z_iso _ _ f g).
+  Proof.
+    use isweq_iso.
+    - exact z_iso_to_inv2cell.
+    - abstract
+        (intro i ;
+         apply cell_from_invertible_2cell_eq ;
+         apply idpath).
+    - abstract
+        (intro i ;
+         apply z_iso_eq ;
+         apply idpath).
+  Defined.
+
+  Definition inv2cell_to_z_iso_weq
+             {a b : B}
+             (f g : hom a b)
+    : invertible_2cell f g ≃ z_iso f g.
+  Proof.
+    use make_weq.
+    - exact (λ α, inv2cell_to_z_iso α).
+    - exact (inv2cell_to_z_iso_isweq f g).
+  Defined.
+End InvertibleIsIso.

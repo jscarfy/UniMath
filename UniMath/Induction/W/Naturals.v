@@ -12,8 +12,8 @@ Require Import UniMath.Foundations.PartD.
 Require Import UniMath.Foundations.UnivalenceAxiom.
 Require Import UniMath.CategoryTheory.Core.Categories.
 Require Import UniMath.CategoryTheory.Core.Functors.
-Require Import UniMath.CategoryTheory.categories.Type.Core.
-Require Import UniMath.CategoryTheory.FunctorAlgebras.
+Require Import UniMath.CategoryTheory.Categories.Type.Core.
+Require Import UniMath.Induction.FunctorAlgebras_legacy.
 Require Import UniMath.Induction.PolynomialFunctors.
 Require Import UniMath.Induction.W.Core.
 Require Import UniMath.Induction.W.Fibered.
@@ -29,10 +29,10 @@ Definition nat_functor : functor type_precat type_precat :=
 (** The functor deals with functions from ∅ and unit; these lemmas will come in
     handy in several proofs. *)
 Lemma eqfromempty {X : UU} (f : empty -> X) : f = fromempty.
-Proof. apply proofirrelevance, isapropifcontr, iscontrfunfromempty. Defined.
+Proof. apply proofirrelevancecontr, iscontrfunfromempty. Defined.
 
 Lemma eta_unit {X : UU} (f : unit -> X) : f = λ _, f tt.
-Proof. apply funextfun; intros ?; induction _; reflexivity. Defined.
+Proof. apply funextfun; intro; induction _; reflexivity. Defined.
 
 (** Simplifying the action of the functor on arrows *)
 
@@ -121,12 +121,11 @@ Definition make_nat_functor_algebra_mor {X Y : algebra_ob nat_functor} :
 Proof.
   intros X' Y' f p.
   apply from_nat_functor_eq.
-  + unfold funcomp.
-    refine (_ @ !maponpaths _ (nat_functor_arr_true f _)).
+  + refine (_ @ !maponpaths _ (nat_functor_arr_true f _)).
     refine (pr1 p @ _).
     apply (maponpaths (pr2 Y)), maponpaths.
     reflexivity.
-  + intros ?; apply (eqtohomot (pr2 p)).
+  + intro; apply (eqtohomot (pr2 p)).
 Defined.
 
 (** Define the unique algebra morphism out of ℕ *)
@@ -176,14 +175,14 @@ Lemma sec_fromempty {X : UU} {Y : X -> UU}
       (f : ∅ -> X)
       (t : ∏ z : ∅, Y (f z)) : t = λ e, fromempty e.
 Proof.
-  apply funextsec; intros ?; induction _.
+  apply funextsec; intro; induction _.
 Defined.
 
 (** A fibered algebra over ℕ consists of a family ℕ → UU, a point x0 : X 0,
     and a function from each X n to X (S n).
  *)
 Definition fibered_algebra_nat :
-  fibered_alg nat_alg_z ≃ ∑ (X : ∏ n : ℕ, UU), (X 0) × (∏ {n}, X n → X (S n)).
+  fibered_alg nat_alg_z ≃ ∑ (X : ∏ n : ℕ, UU), (X 0) × (∏ n, X n → X (S n)).
 Proof.
   apply weqfibtototal; intro X; cbn in X.
   use weq_iso.

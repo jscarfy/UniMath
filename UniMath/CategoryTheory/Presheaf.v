@@ -27,7 +27,9 @@ Written by: Anders Mörtberg, 2017-2019
 
 Require Import UniMath.MoreFoundations.All.
 
-Require Import UniMath.Algebra.Lattice.
+Require Import UniMath.Algebra.Monoids.
+Require Import UniMath.OrderTheory.Lattice.Lattice.
+Require Import UniMath.OrderTheory.Lattice.Bounded.
 
 Require Import UniMath.CategoryTheory.Core.Categories.
 Require Import UniMath.CategoryTheory.Core.Functors.
@@ -39,28 +41,28 @@ Require Import UniMath.CategoryTheory.exponentials.
 Require Import UniMath.CategoryTheory.Monics.
 Require Import UniMath.CategoryTheory.LatticeObject.
 
-Require Import UniMath.CategoryTheory.categories.HSET.Core.
-Require Import UniMath.CategoryTheory.categories.HSET.Limits.
-Require Import UniMath.CategoryTheory.categories.HSET.Colimits.
-Require Import UniMath.CategoryTheory.categories.HSET.Structures.
+Require Import UniMath.CategoryTheory.Categories.HSET.Core.
+Require Import UniMath.CategoryTheory.Categories.HSET.Limits.
+Require Import UniMath.CategoryTheory.Categories.HSET.Colimits.
+Require Import UniMath.CategoryTheory.Categories.HSET.Structures.
 
-Require Import UniMath.CategoryTheory.limits.graphs.colimits.
-Require Import UniMath.CategoryTheory.limits.graphs.limits.
-Require Import UniMath.CategoryTheory.limits.binproducts.
-Require Import UniMath.CategoryTheory.limits.products.
-Require Import UniMath.CategoryTheory.limits.bincoproducts.
-Require Import UniMath.CategoryTheory.limits.coproducts.
-Require Import UniMath.CategoryTheory.limits.initial.
-Require Import UniMath.CategoryTheory.limits.terminal.
-Require Import UniMath.CategoryTheory.limits.pullbacks.
+Require Import UniMath.CategoryTheory.Limits.Graphs.Colimits.
+Require Import UniMath.CategoryTheory.Limits.Graphs.Limits.
+Require Import UniMath.CategoryTheory.Limits.BinProducts.
+Require Import UniMath.CategoryTheory.Limits.Products.
+Require Import UniMath.CategoryTheory.Limits.BinCoproducts.
+Require Import UniMath.CategoryTheory.Limits.Coproducts.
+Require Import UniMath.CategoryTheory.Limits.Initial.
+Require Import UniMath.CategoryTheory.Limits.Terminal.
+Require Import UniMath.CategoryTheory.Limits.Pullbacks.
 
 Local Open Scope cat.
 
-Notation "'PreShv' C" := [C^op,SET] (at level 4) : cat.
+Notation "'PreShv' C" := [C^op, HSET] (at level 4) : cat.
 
 Section basics.
 
-Lemma transportf_PreShv {C : precategory} (F : PreShv C) {x y z : C}
+Lemma transportf_PreShv {C : category} (F : PreShv C) {x y z : C}
   (e : x = y) (f : C⟦x,z⟧) (u : ((F : functor _ _) z : hSet)) :
   transportf (λ x, pr1 (pr1 F x)) e (# (pr1 F) f u) =
   # (pr1 F) (transportf (@precategory_morphisms C^op z) e f) u.
@@ -73,7 +75,7 @@ End basics.
 (** Various limits and colimits in PreShv C *)
 Section limits.
 
-Context {C : precategory}.
+Context {C : category}.
 
 (* This should be only small limits *)
 (* Lemma Lims_PreShv : Lims (PreShv C). *)
@@ -132,10 +134,10 @@ Proof.
 now apply FunctorcategoryPullbacks, PullbacksHSET.
 Defined.
 
-Lemma Exponentials_PreShv (hsC : has_homsets C) :
+Lemma Exponentials_PreShv :
   Exponentials BinProducts_PreShv.
 Proof.
-now apply Exponentials_functor_HSET, has_homsets_opp, hsC.
+now apply Exponentials_functor_HSET.
 Defined.
 
 End limits.
@@ -143,7 +145,7 @@ End limits.
 (** * Define some standard presheaves *)
 Section presheaves.
 
-Context {C : precategory}.
+Context {C : category}.
 
 Definition constant_PreShv (A : HSET) : PreShv C.
 Proof.
@@ -165,7 +167,7 @@ See: "Sheaves in Geometry and Logic" by Mac Lane and Moerdijk (page 37)
 (* TODO: Prove that Ω actually is the subobject classifier  *)
 Section Ω_PreShv.
 
-Context {C : precategory}.
+Context {C : category}.
 
 Definition sieve_def (c : C) : UU.
 Proof.
@@ -236,7 +238,7 @@ Defined.
 
 Definition sieve_lattice (c : C) : lattice (sieve c).
 Proof.
-use mklattice.
+use make_lattice.
 - apply intersection_sieve.
 - apply union_sieve.
 - repeat split; intros S1; intros;
@@ -251,7 +253,7 @@ Defined.
 
 Definition sieve_bounded_lattice (c : C) : bounded_lattice (sieve c).
 Proof.
-use mkbounded_lattice.
+use make_bounded_lattice.
 - apply sieve_lattice.
 - apply empty_sieve.
 - apply maximal_sieve.
@@ -297,7 +299,7 @@ Defined.
 
 Lemma isMonic_Ω_mor : isMonic Ω_mor.
 Proof.
-now apply from_terminal_isMonic.
+now apply global_element_isMonic.
 Qed.
 
 Local Notation "c ⊗ d" := (BinProductObject _ (BinProducts_PreShv c d)) : cat.
@@ -369,10 +371,10 @@ End Ω_PreShv.
 (** Construction of isomorphisms of functors between presheaf categories *)
 Section iso_presheaf.
 
-Context {C : precategory}.
+Context {C : category}.
 
-Local Definition make_PreShv_functor_iso_helper (F G : functor (PreShv C) (PreShv C))
-      (set_iso : ∏ X c, iso (pr1 (F X) c) (pr1 (G X) c))
+Local Definition make_PreShv_functor_z_iso_helper (F G : functor (PreShv C) (PreShv C))
+      (set_iso : ∏ X c, z_iso (pr1 (F X) c) (pr1 (G X) c))
       (nat_in_c : ∏ X, is_nat_trans _ _ (λ c, set_iso X c))
       (nat_in_X : is_nat_trans F G (λ X, make_nat_trans _ _ _ (nat_in_c X))) :
       [PreShv C, PreShv C] ⟦ F, G ⟧.
@@ -386,36 +388,34 @@ Proof.
     + exact nat_in_X.
 Defined.
 
-Lemma make_PreShv_functor_iso (F G : functor (PreShv C) (PreShv C))
-      (set_iso : ∏ X c, iso (pr1 (F X) c) (pr1 (G X) c))
+Lemma make_PreShv_functor_z_iso (F G : functor (PreShv C) (PreShv C))
+      (set_iso : ∏ X c, z_iso (pr1 (F X) c) (pr1 (G X) c))
       (nat_in_c : ∏ X, is_nat_trans _ _ (λ c, set_iso X c))
       (nat_in_X : is_nat_trans F G (λ X, make_nat_trans _ _ _ (nat_in_c X))) :
-      @iso [PreShv C, PreShv C] F G.
+      @z_iso [PreShv C, PreShv C] F G.
 Proof.
-  use make_iso.
-  - exact (make_PreShv_functor_iso_helper F G set_iso nat_in_c nat_in_X).
-  - use is_iso_from_is_z_iso.
-    use make_is_z_isomorphism.
-    + use make_PreShv_functor_iso_helper.
+  exists (make_PreShv_functor_z_iso_helper F G set_iso nat_in_c nat_in_X).
+  use make_is_z_isomorphism.
+  + use make_PreShv_functor_z_iso_helper.
       * intros X c.
-        exact (iso_inv_from_iso (set_iso X c)).
+        exact (z_iso_inv_from_z_iso (set_iso X c)).
       * abstract (intros X c y f;
-                  apply pathsinv0, iso_inv_on_left; rewrite <- assoc;
-                  now apply pathsinv0, iso_inv_on_right, (nat_in_c X)).
+                  apply pathsinv0, z_iso_inv_on_left; rewrite <- assoc;
+                  now apply pathsinv0, z_iso_inv_on_right, (nat_in_c X)).
       * abstract (intros X Y α;
                   apply nat_trans_eq; [ apply homset_property|];
                   intro x; simpl;
-                  apply pathsinv0, (iso_inv_on_left _ _ _ _ _ (set_iso Y x));
-                  rewrite <- assoc; apply pathsinv0, iso_inv_on_right;
+                  apply pathsinv0, (z_iso_inv_on_left _ _ _ _ (set_iso Y x));
+                  rewrite <- assoc; apply pathsinv0, (z_iso_inv_on_right (C:=HSET));
                   exact (eqtohomot (maponpaths pr1 (nat_in_X X Y α)) x)).
     + abstract (use make_is_inverse_in_precat;
                 [ apply nat_trans_eq; [ apply homset_property |]; intro X;
                   apply nat_trans_eq; [ apply homset_property |]; intro x;
-                  exact (iso_inv_after_iso (set_iso X x))
+                  exact (z_iso_inv_after_z_iso (set_iso X x))
                 | apply nat_trans_eq; [ apply homset_property |]; intro X;
                   apply nat_trans_eq; [ apply homset_property |]; intro x;
                   apply funextsec; intros y;
-                  exact (eqtohomot (iso_after_iso_inv (set_iso X x)) y) ]).
+                  exact (eqtohomot (z_iso_after_z_iso_inv (set_iso X x)) y) ]).
 Defined.
 
 End iso_presheaf.

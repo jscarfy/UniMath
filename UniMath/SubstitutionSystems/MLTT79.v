@@ -16,39 +16,24 @@ Require Import UniMath.CategoryTheory.Core.Categories.
 Require Import UniMath.CategoryTheory.Core.Functors.
 Local Open Scope cat.
 Require Import UniMath.CategoryTheory.FunctorCategory.
-Require Import UniMath.CategoryTheory.categories.HSET.Core.
-Require Import UniMath.CategoryTheory.categories.HSET.Limits.
-Require Import UniMath.CategoryTheory.categories.HSET.Colimits.
-Require Import UniMath.CategoryTheory.categories.HSET.Structures.
-Require Import UniMath.CategoryTheory.Chains.Chains.
-Require Import UniMath.CategoryTheory.Chains.OmegaCocontFunctors.
-Require Import UniMath.CategoryTheory.limits.graphs.limits.
-Require Import UniMath.CategoryTheory.limits.graphs.colimits.
-Require Import UniMath.CategoryTheory.limits.initial.
-Require Import UniMath.CategoryTheory.limits.binproducts.
-Require Import UniMath.CategoryTheory.limits.products.
-Require Import UniMath.CategoryTheory.limits.bincoproducts.
-Require Import UniMath.CategoryTheory.limits.coproducts.
-Require Import UniMath.CategoryTheory.limits.terminal.
+Require Import UniMath.CategoryTheory.Categories.HSET.Core.
+Require Import UniMath.CategoryTheory.Categories.HSET.Colimits.
+Require Import UniMath.CategoryTheory.Limits.Initial.
+Require Import UniMath.CategoryTheory.Limits.BinProducts.
+Require Import UniMath.CategoryTheory.Limits.BinCoproducts.
 Require Import UniMath.CategoryTheory.FunctorAlgebras.
-Require Import UniMath.CategoryTheory.exponentials.
-Require Import UniMath.CategoryTheory.whiskering.
 Require Import UniMath.CategoryTheory.Monads.Monads.
 
 Require Import UniMath.SubstitutionSystems.Signatures.
-Require Import UniMath.SubstitutionSystems.BinSumOfSignatures.
-Require Import UniMath.SubstitutionSystems.SumOfSignatures.
-Require Import UniMath.SubstitutionSystems.BinProductOfSignatures.
-Require Import UniMath.SubstitutionSystems.SubstitutionSystems.
-Require Import UniMath.SubstitutionSystems.LamSignature.
 Require Import UniMath.SubstitutionSystems.Notation.
+Require UniMath.SubstitutionSystems.SubstitutionSystems.
 Local Open Scope subsys.
 Require Import UniMath.SubstitutionSystems.BindingSigToMonad.
 Require Import UniMath.SubstitutionSystems.LiftingInitial_alt.
 
 Local Infix "::" := (@cons nat).
 Local Notation "[]" := (@nil nat) (at level 0, format "[]").
-Local Notation "'HSET2'":= [HSET, HSET, has_homsets_HSET].
+Local Notation "'HSET2'":= [HSET, HSET].
 
 Section preamble.
 
@@ -60,11 +45,6 @@ induction n as [|n _]; [apply b|].
 induction n as [|n _]; [apply c|].
 induction n as [|n _]; [apply d|].
 induction (nopathsfalsetotrue p).
-Defined.
-
-Local Lemma has_homsets_HSET2 : has_homsets HSET2.
-Proof.
-apply functor_category_has_homsets.
 Defined.
 
 End preamble.
@@ -121,16 +101,16 @@ Local Notation "[0,0,2]" := (0 :: 0 :: 2 :: []).
 Local Notation "[0,1,1]" := (0 :: 1 :: 1 :: []).
 
 Definition PiSig : BindingSig :=
-  mkBindingSig (isasetstn 3) (three_rec [0,1] [1] [0,0]).
+  make_BindingSig (isasetstn 3) (three_rec [0,1] [1] [0,0]).
 
 Definition SigmaSig : BindingSig :=
-  mkBindingSig (isasetstn 3) (three_rec [0,1] [0,0] [0,2]).
+  make_BindingSig (isasetstn 3) (three_rec [0,1] [0,0] [0,2]).
 
 Definition SumSig : BindingSig :=
-  mkBindingSig (isasetstn 4) (four_rec [0,0] [0] [0] [0,1,1]).
+  make_BindingSig (isasetstn 4) (four_rec [0,0] [0] [0] [0,1,1]).
 
 Definition IdSig : BindingSig :=
-  mkBindingSig (isasetstn 3) (three_rec [0,0,0] [] [0,0]).
+  make_BindingSig (isasetstn 3) (three_rec [0,0,0] [] [0,0]).
 
 (** Define the arity of the eliminators for Fin by recursion *)
 Definition FinSigElim (n : nat) : list nat.
@@ -181,17 +161,17 @@ Proof.
     apply isdeceqstn.
 Defined.
 
-Definition FinSig : BindingSig := mkBindingSig isasetFinSig FinSigFun.
+Definition FinSig : BindingSig := make_BindingSig isasetFinSig FinSigFun.
 
 Definition NatSig : BindingSig :=
-  mkBindingSig (isasetstn 4) (four_rec [] [] [0] [0,0,2]).
+  make_BindingSig (isasetstn 4) (four_rec [] [] [0] [0,0,2]).
 
 Definition WSig : BindingSig :=
-  mkBindingSig (isasetstn 3) (three_rec [0,1] [0,0] [0,3]).
+  make_BindingSig (isasetstn 3) (three_rec [0,1] [0,0] [0,3]).
 
-Definition USig : BindingSig := mkBindingSig isasetnat (λ _, []).
+Definition USig : BindingSig := make_BindingSig isasetnat (λ _, []).
 
-Let SigHSET := Signature HSET has_homsets_HSET HSET has_homsets_HSET HSET has_homsets_HSET.
+Let SigHSET := Signature HSET HSET HSET.
 
 (** The binding signature of MLTT79 *)
 Definition MLTT79Sig := PiSig ++ SigmaSig ++ SumSig ++ IdSig ++
@@ -201,14 +181,14 @@ Definition MLTT79Sig := PiSig ++ SigmaSig ++ SumSig ++ IdSig ++
 
 Definition MLTT79Signature : SigHSET := BindingSigToSignatureHSET MLTT79Sig.
 
-Let Id_H := Id_H _ has_homsets_HSET BinCoproductsHSET.
+Let Id_H := SubstitutionSystems.Id_H _ BinCoproductsHSET.
 
-Definition MLTT79Functor : functor HSET2 HSET2 := Id_H MLTT79Signature.
+Definition MLTT79Functor : functor HSET2 HSET2 := Id_H (Presignature_Signature MLTT79Signature).
 
 Definition MLTT79Monad : Monad HSET := BindingSigToMonadHSET MLTT79Sig.
 
 Lemma MLTT79Functor_Initial :
-   Initial (FunctorAlg MLTT79Functor has_homsets_HSET2).
+   Initial (FunctorAlg MLTT79Functor).
 Proof.
 apply SignatureInitialAlgebraHSET, is_omega_cocont_BindingSigToSignatureHSET.
 Defined.
@@ -223,7 +203,7 @@ Let MLTT79_alg : algebra_ob MLTT79Functor :=
   InitialObject MLTT79Functor_Initial.
 
 Definition var_map : HSET2⟦functor_identity HSET,MLTT79⟧ :=
-  BinCoproductIn1 HSET2 (BinCoproducts_functor_precat _ _ _ _ _ _) · MLTT79_mor.
+  SubstitutionSystems.η MLTT79_alg.
 
 (* TODO: define the rest of the constructors and computation rules? *)
 

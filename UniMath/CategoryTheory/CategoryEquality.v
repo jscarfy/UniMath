@@ -59,7 +59,7 @@ Proof.
     induction C as [C HC].
     induction D as [D HD].
     cbn in *.
-    induction p ; cbn ; unfold idfun.
+    induction p ; cbn.
     refine (_ ∘ total2_paths_equiv _ _ _)%weq.
     use weqfibtototal.
     intros p.
@@ -124,7 +124,7 @@ Proof.
     induction p as [p1 p2] ; cbn in *.
     unfold data_cat_eq_1 in p2.
     induction p1 ; cbn in *.
-    induction p2 ; cbn ; unfold idfun.
+    induction p2 ; cbn.
     use weqdirprodf.
     + use weqimplimpl.
       * intros f a.
@@ -247,3 +247,12 @@ Definition catiso_is_path_precat
         ∘ cat_eq_1_to_cat_eq_2 C D HD
         ∘ cat_path_to_cat_eq_1 C D
         ∘ path_precat C D HD)%weq.
+
+Definition catiso_is_path_cat
+           (C D : category)
+  : C = D ≃ catiso C D.
+Proof.
+  refine (catiso_is_path_precat _ _ (homset_property D) ∘ _)%weq.
+  refine (path_sigma_hprop _ _ _ _).
+  apply isaprop_has_homsets.
+Defined.
