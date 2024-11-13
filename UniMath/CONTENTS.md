@@ -135,9 +135,11 @@ The packages and files are listed here in logical order: each file depends only 
    - [Integers.v](NumberSystems/Integers.v)
    - [RationalNumbers.v](NumberSystems/RationalNumbers.v)
    - [Tests.v](NumberSystems/Tests.v)
+   - [Yang_n.v](NumberSystems/Yang_n.v)
    - [All.v](NumberSystems/All.v)
 ## NumberTheory
    - [Primes.v](NumberTheory/Primes.v)
+   - [RH.v](NumberTheory/RH.v)
 ## Package [SyntheticHomotopyTheory](SyntheticHomotopyTheory/README.md)
    - [Coproduct.v](SyntheticHomotopyTheory/Coproduct.v)
    - [Halfline.v](SyntheticHomotopyTheory/Halfline.v)
